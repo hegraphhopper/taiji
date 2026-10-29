@@ -1,0 +1,41 @@
+{
+  "schema_version": 2,
+  "context_id": "5f4c837c-6b93-4c8b-97a0-5daeb6e461a3",
+  "activity_active": false,
+  "task": {
+    "id": "helloworld-java",
+    "status": "in_progress"
+  },
+  "current": {
+    "phase": "finish",
+    "step": "spec_update",
+    "source": "skill",
+    "role": null,
+    "observed_at": "2026-10-29T14:07:50.106Z"
+  },
+  "active_roles": [],
+  "completed_steps": [
+    {
+      "phase": "plan",
+      "step": "use_case_design",
+      "completed_at": "2026-10-29T13:48:00.655Z"
+    },
+    {
+      "phase": "execute",
+      "step": "context_loading",
+      "completed_at": "2026-10-29T13:48:00.667Z"
+    },
+    {
+      "phase": "execute",
+      "step": "implementation",
+      "completed_at": "2026-10-29T13:48:40.991Z"
+    },
+    {
+      "phase": "finish",
+      "step": "quality_check",
+      "completed_at": "2026-10-29T13:50:43.025Z"
+    }
+  ],
+  "preparation": null,
+  "waiting_for": null
+}
