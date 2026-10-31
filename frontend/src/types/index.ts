@@ -505,3 +505,58 @@ export interface DrillProject {
   attributionTotal: number
   analysisDate: string
 }
+
+export interface InvestmentQueryParams {
+  startYear?: number | null
+  endYear?: number | null
+  fundType?: string | null
+  groupId?: number | null
+  techDirectionId?: number | null
+  includeCompleted?: boolean
+}
+
+export interface InvestmentOverview {
+  hasData: boolean
+  totalBudget: number
+  projectCount: number
+  inProgressCount: number
+  completedCount: number
+  avgBudget: number
+  analyzedCount: number
+  unanalyzedCount: number
+  avgMaxScore: number
+  highRiskCount: number
+  exposure: number
+  highExposure: number
+  yoyBudgetRatio: number | null
+  yoyCountRatio: number | null
+  thresholds: Record<string, number>
+  note: string
+}
+
+export interface DistributionItem {
+  key: string
+  label: string
+  projectCount: number
+  budget: number
+  budgetShare: number
+  avgMaxScore: number
+  highRiskCount: number
+  exposure: number
+}
+
+export interface InvestmentProject {
+  projectId: number
+  code: string | null
+  name: string | null
+  groupId: number | null
+  groupName: string | null
+  techDirectionName: string | null
+  fundType: string | null
+  status: string
+  budget: number
+  maxScore: number | null
+  riskLevel: string
+  exposure: number | null
+  year: number | null
+}

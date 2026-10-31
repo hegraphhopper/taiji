@@ -24,10 +24,14 @@ public class TrendScope {
     }
 
     public static TrendScope resolve(TrendQuery query) {
+        return resolve(query == null ? null : query.getGroupId());
+    }
+
+    public static TrendScope resolve(Long requestedGroupId) {
         LoginUser user = SecurityUtils.currentUser();
         if (user.getRoles().contains(RoleCode.ADMIN.name())
                 || user.getRoles().contains(RoleCode.PMO.name())) {
-            return new TrendScope(true, query == null ? null : query.getGroupId());
+            return new TrendScope(true, requestedGroupId);
         }
         if (user.getRoles().contains(RoleCode.GROUP_USER.name())) {
             if (user.getGroupId() == null) {

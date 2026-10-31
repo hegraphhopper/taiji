@@ -38,6 +38,10 @@
           <el-icon><TrendCharts /></el-icon>
           <template #title>趋势与归因 <span class="phase-tag">A4</span></template>
         </el-menu-item>
+        <el-menu-item v-if="canViewTrend" index="/investment">
+          <el-icon><Money /></el-icon>
+          <template #title>投入态势 <span class="phase-tag">B1</span></template>
+        </el-menu-item>
       </el-menu>
 
       <div v-if="!collapsed" class="sidebar-foot">
@@ -126,6 +130,7 @@ import {
   Expand,
   Fold,
   Folder,
+  Money,
   Odometer,
   TrendCharts
 } from '@element-plus/icons-vue'

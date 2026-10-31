@@ -1,0 +1,5 @@
+{"file": ".trellis/tasks/10-29-fund-investment/test/用例设计.md", "reason": "B1 单元测试用例设计（check 阶段测试输入）"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "构建、测试与验证命令约定"}
+{"file": ".trellis/spec/backend/analysis-guidelines.md", "reason": "快照、风险等级与敞口口径上游契约"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "图表渲染、空态与筛选联动验证"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "投入汇总与项目明细对账"}

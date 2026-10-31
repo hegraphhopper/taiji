@@ -1,3 +1,12 @@
+## 0. 实施口径（B1 锁定）
+
+- 模块：`com.taiji.fund.insight.investment`（只读聚合，不新增迁移）。
+- 行模型：项目 × 最新快照；状态限 `APPROVED/IN_PROGRESS/COMPLETED`。
+- 未分析：`unanalyzedCount` 单列，平均分分母排除。
+- 年份：`start_date` 年度，缺失回退 `created_at`。
+- 高风险：`max_score >= 当前 high`；敞口 `budget × max_score / 100`。
+- 同比：最新年度 vs 上一年度，缺失返回 null。
+- 复用 `TrendScope` 与 A4 的权限/过滤；导出使用 POI `SXSSFWorkbook`。
 # 技术创新投入态势分析 — 技术设计
 
 ## 1. 数据与口径实现

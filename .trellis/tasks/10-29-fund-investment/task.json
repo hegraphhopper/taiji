@@ -3,7 +3,7 @@
   "name": "fund-investment",
   "title": "技术创新投入态势分析",
   "description": "按年度/基金类型/项目组/技术方向的投入分析、重复投入风险敞口、趋势对比",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,

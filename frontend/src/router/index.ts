@@ -60,6 +60,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '趋势与归因', roles: ['PMO', 'ADMIN', 'GROUP_USER'] }
       },
       {
+        path: 'investment',
+        name: 'investment',
+        component: () => import('@/views/investment/InvestmentView.vue'),
+        meta: { title: '投入态势', roles: ['PMO', 'ADMIN', 'GROUP_USER'] }
+      },
+      {
         path: 'analysis/runs',
         name: 'analysis-runs',
         component: () => import('@/views/analysis/AnalysisRunsView.vue'),
