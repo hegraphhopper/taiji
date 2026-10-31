@@ -45,6 +45,9 @@ public enum ErrorCode {
 
     ANALYSIS_RUN_CONFLICT(40930, "已有分析任务正在运行", 409),
 
+    DECISION_RULE_INVALID(40050, "决策规则不合法", 400),
+    DECISION_RECORD_NOT_FOUND(40440, "决策记录不存在", 404),
+
     INTERNAL_ERROR(50000, "服务器内部错误", 500);
 
     private final int code;

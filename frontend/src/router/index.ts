@@ -66,6 +66,24 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '投入态势', roles: ['PMO', 'ADMIN', 'GROUP_USER'] }
       },
       {
+        path: 'decision',
+        name: 'decision',
+        component: () => import('@/views/decision/DecisionView.vue'),
+        meta: { title: '辅助决策', roles: ['PMO', 'ADMIN', 'GROUP_USER'] }
+      },
+      {
+        path: 'decision/records',
+        name: 'decision-records',
+        component: () => import('@/views/decision/DecisionRecordsView.vue'),
+        meta: { title: '决策记录', roles: ['PMO', 'ADMIN', 'GROUP_USER', 'EXPERT'] }
+      },
+      {
+        path: 'decision/rules',
+        name: 'decision-rules',
+        component: () => import('@/views/decision/DecisionRulesView.vue'),
+        meta: { title: '决策规则', roles: ['ADMIN'] }
+      },
+      {
         path: 'analysis/runs',
         name: 'analysis-runs',
         component: () => import('@/views/analysis/AnalysisRunsView.vue'),

@@ -1,0 +1,6 @@
+{"file": ".trellis/tasks/10-29-fund-decision/test/用例设计.md", "reason": "B2 单元测试用例设计（check 阶段测试输入）"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "构建、测试与验证命令约定"}
+{"file": ".trellis/spec/backend/analysis-guidelines.md", "reason": "预检与相似对上游契约"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Flyway V5 与 H2/MySQL 兼容"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "预检页、记录页与图表验证"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "预检结论、记录快照与报告一致性"}

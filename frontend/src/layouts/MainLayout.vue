@@ -42,10 +42,22 @@
           <el-icon><Money /></el-icon>
           <template #title>投入态势 <span class="phase-tag">B1</span></template>
         </el-menu-item>
+        <el-menu-item v-if="canDecide" index="/decision">
+          <el-icon><Aim /></el-icon>
+          <template #title>辅助决策 <span class="phase-tag">B2</span></template>
+        </el-menu-item>
+        <el-menu-item v-if="canViewRecords" index="/decision/records">
+          <el-icon><DocumentChecked /></el-icon>
+          <template #title>决策记录 <span class="phase-tag">B2</span></template>
+        </el-menu-item>
+        <el-menu-item v-if="isAdmin" index="/decision/rules">
+          <el-icon><Setting /></el-icon>
+          <template #title>决策规则</template>
+        </el-menu-item>
       </el-menu>
 
       <div v-if="!collapsed" class="sidebar-foot">
-        <span class="dot"></span> A4 趋势与归因 · 只读聚合
+        <span class="dot"></span> B2 辅助决策 · 规则优先，大模型补充
       </div>
     </el-aside>
 
@@ -125,13 +137,16 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import {
+  Aim,
   ArrowDown,
   DataAnalysis,
+  DocumentChecked,
   Expand,
   Fold,
   Folder,
   Money,
   Odometer,
+  Setting,
   TrendCharts
 } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
@@ -148,6 +163,8 @@ const activeMenu = computed(() => route.path)
 const initial = computed(() => auth.displayName.slice(0, 1))
 const canAnalyze = computed(() => auth.hasRole('ADMIN', 'PMO'))
 const canViewTrend = computed(() => auth.hasRole('ADMIN', 'PMO', 'GROUP_USER'))
+const canDecide = computed(() => auth.hasRole('ADMIN', 'PMO', 'GROUP_USER'))
+const canViewRecords = computed(() => auth.hasRole('ADMIN', 'PMO', 'GROUP_USER', 'EXPERT'))
 const isAdmin = computed(() => auth.hasRole('ADMIN'))
 
 const passwordVisible = ref(false)

@@ -560,3 +560,102 @@ export interface InvestmentProject {
   exposure: number | null
   year: number | null
 }
+
+export type DecisionMode = 'PROJECT' | 'TEXT'
+
+export type DecisionAction = 'APPROVE' | 'EXPLAIN' | 'MERGE' | 'TERMINATE'
+
+export interface DecisionPrecheckPayload {
+  mode: DecisionMode
+  projectId?: number | null
+  goalText?: string
+  contentText?: string
+  techText?: string
+  milestoneText?: string
+  techDirectionId?: number | null
+  budget?: number | null
+}
+
+export interface SuggestedExpert {
+  id: number
+  realName: string
+  groupName: string | null
+  ongoingReviews: number
+  sameDirectionReviews: number
+}
+
+export interface DecisionPrecheckResult {
+  mode: DecisionMode
+  runId: number
+  projectId: number | null
+  projectCode: string | null
+  projectName: string | null
+  groupName: string | null
+  techDirectionName: string | null
+  budget: number | null
+  riskScore: number
+  level: DuplicateLevel
+  topPeers: PeerMatch[]
+  recommendation: DecisionAction
+  ruleId: number | null
+  ruleDescription: string | null
+  reason: string
+  savingsEstimate: number | null
+  suggestedExperts: SuggestedExpert[]
+  llmUsed: boolean
+  inputHash: string | null
+}
+
+export interface DecisionRecord {
+  id: number
+  projectId: number | null
+  projectCode: string | null
+  projectName: string | null
+  groupName: string | null
+  runId: number | null
+  riskScore: number
+  level: DuplicateLevel
+  recommendation: DecisionAction
+  reason: string | null
+  similarProjects: PeerMatch[]
+  savingsEstimate: number | null
+  inputHash: string | null
+  operatorId: number | null
+  operatorName: string | null
+  createdAt: string | null
+}
+
+export interface DecisionSavePayload {
+  projectId?: number | null
+  runId?: number | null
+  riskScore: number
+  level: string
+  recommendation: string
+  reason?: string | null
+  similarProjects: string
+  savingsEstimate?: number | null
+  inputHash?: string | null
+}
+
+export interface DecisionQueryParams {
+  projectId?: number | null
+  groupId?: number | null
+  level?: string | null
+  recommendation?: string | null
+  from?: string | null
+  to?: string | null
+  page: number
+  size: number
+}
+
+export interface DecisionRuleItem {
+  id?: number
+  priority: number
+  minScore: number
+  maxScore: number
+  relation: string | null
+  sameGroup: number | null
+  action: DecisionAction
+  description: string | null
+  enabled: number
+}
