@@ -26,10 +26,14 @@
           <el-icon><Folder /></el-icon>
           <template #title>项目管理 <span class="phase-tag">A2</span></template>
         </el-menu-item>
-        <el-menu-item index="/analysis" disabled>
-          <el-icon><DataAnalysis /></el-icon>
-          <template #title>分析中心 <span class="phase-tag">A3</span></template>
-        </el-menu-item>
+        <el-sub-menu v-if="canAnalyze" index="/analysis">
+          <template #title>
+            <el-icon><DataAnalysis /></el-icon>
+            <span>分析中心 <span class="phase-tag">A3</span></span>
+          </template>
+          <el-menu-item index="/analysis/runs">分析运行</el-menu-item>
+          <el-menu-item v-if="isAdmin" index="/analysis/config">分析配置</el-menu-item>
+        </el-sub-menu>
         <el-menu-item index="/trend" disabled>
           <el-icon><TrendCharts /></el-icon>
           <template #title>趋势与归因 <span class="phase-tag">A4</span></template>
@@ -137,6 +141,8 @@ const dict = useDictStore()
 const pageTitle = computed(() => (route.meta.title as string) || '工作台')
 const activeMenu = computed(() => route.path)
 const initial = computed(() => auth.displayName.slice(0, 1))
+const canAnalyze = computed(() => auth.hasRole('ADMIN', 'PMO'))
+const isAdmin = computed(() => auth.hasRole('ADMIN'))
 
 const passwordVisible = ref(false)
 const passwordSubmitting = ref(false)

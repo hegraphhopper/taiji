@@ -2,7 +2,7 @@
 
 面向电科太极平台基金、创新基金等自投研发项目的项目管理与重复投入治理平台。A 阶段聚焦核心主线：**结构化申报书 → 多维重复度分析 → 重复度趋势与归因**。
 
-当前版本为 A2 申报管理版：在 A1 工程底座之上，完成项目主数据、结构化申报内容（目标/研制内容/关键技术/节点/成员）、附件上传与章节解析回填、基础状态流转与审批轨迹。分析引擎、趋势归因在 A3–A4 实现；角色管理与 OA 审批流在 C 阶段收尾。
+当前版本为 A3 重复度分析版：在 A1 工程底座、A2 申报管理之上，完成可解释的多维重复度分析——运行级 TF-IDF、五维加权打分、四类归因、重复/差异片段、可选大模型语义融合与降级，以及项目重复度报告与运行记录。趋势归因在 A4 实现；角色管理与 OA 审批流在 C 阶段收尾。
 
 ## 技术栈
 
@@ -110,6 +110,8 @@ npm run build
 | `UPLOAD_DIR` | 附件存储目录 | `./storage` |
 | `CORS_ALLOWED_ORIGINS` | 允许的前端来源 | `http://localhost:5173,http://127.0.0.1:5173` |
 | `ADMIN_INIT_PASSWORD` | prod 首次启动管理员密码 | 无 |
+| `LLM_ENABLED` | 是否启用大模型语义复核 | `false` |
+| `LLM_BASE_URL` / `LLM_MODEL` / `LLM_API_KEY` | OpenAI 兼容接口地址、模型、密钥（仅环境变量，不落库不写日志） | 无 |
 
 演示数据落在 `./data/funddb.*`（H2 文件库），首次启动由 Flyway 自动建表并写入种子。删除 `data/` 可重建演示库。
 
@@ -124,11 +126,14 @@ npm run build
 │  ├─ system/                        用户/角色/项目组/技术方向/字典/审计
 │  ├─ project/                       项目主数据、结构化内容、状态机、查询
 │  ├─ document/                      附件上传、文本提取、章节解析
+│  ├─ analysis/                      分析配置、分词/向量/打分/归因、运行与查询
 │  ├─ health/                        健康检查
 │  └─ bootstrap/                     演示账号初始化
 ├─ src/main/resources/
-│  ├─ application*.yml               配置
-│  └─ db/migration/                  Flyway V1 建表、V2 种子、V3 项目表
+│  ├─ application*.yml               配置（含 app.llm.*，默认关闭）
+│  ├─ terms/tech-terms.txt           内置技术术语词典（310 条）
+│  ├─ prompts/duplicate-analysis.txt LLM 查重提示词
+│  └─ db/migration/                  Flyway V1 系统表、V2 种子、V3 项目、V4 分析
 ├─ frontend/                         Vue 3 + TypeScript 前端
 ├─ scripts/                          start/stop/status 脚本
 ├─ docs/                             产品设计与交付文档
@@ -158,9 +163,22 @@ npm run build
 - 数据范围：ADMIN/PMO 全量、GROUP_USER 本组、EXPERT 已提交项目只读；后端强制过滤
 - 前端：项目列表（筛选/分页/排序）、分区新建编辑表单、详情六 Tab、解析预览与回填
 
+## A3 已实现能力
+
+- 分析配置：五维字段权重、等级阈值、Top-K、同期窗口、大模型开关/权重/候选数/超时；版本自增、历史可查、仅 ADMIN 可改
+- 文本处理：全角/HTML/控制符清洗、中文 2-gram + 英文词 + 术语词典加权（×3）、运行级 TF-IDF + 余弦
+- 五维打分：目标 / 研制内容 / 关键技术 / 节点计划 / 技术标签，按配置权重归一化；等级 HIGH/MEDIUM/LOW/NONE
+- 归因：本组内部 / 他组在先 / 我方在先 / 同期并行，存中性事实、按查看视角翻译
+- 可解释：每对输出分维度得分、重复片段与差异片段
+- 可选大模型：OpenAI 兼容接口，仅复核 Top-N，超时/500/非法 JSON 自动降级，单次运行连续 3 次失败熔断，24h 缓存、调用日志脱敏
+- 运行：全量 / 单项目 / 预检，并发保护（重复触发 409），失败清理，`analysisDate` 历史回填
+- 快照与报告：项目级最高分、Top-K 平均、高风险对数、四类归因计数、风险敞口；项目详情「重复度」Tab 展示
+- 前端：分析运行页、分析配置页（ADMIN）、菜单按角色显隐
+- 性能：300 项目全量分析约 1.5s（门禁 5s）；性能用例默认排除，手动执行 `mvn test "-Dtest=AnalysisPerformanceTest" "-Dtest.excludedGroups=none"`
+
 ## 尚未包含
 
-- 重复度分析与趋势归因（A3/A4）
+- 重复度趋势与归因看板（A4）
 - 用户/角色/项目组/技术方向管理界面（C）
 - 形式审查、专家评审、完整审批流（C）
 - 投入态势、辅助决策与报告导出（B）
@@ -170,6 +188,8 @@ npm run build
 - `docs/A阶段产品设计书.md`：A 阶段产品、交互、数据、接口、算法与验收基线
 - `.trellis/tasks/archive/2026-10/10-29-fund-foundation/prd.md`：A1 需求与验收标准
 - `.trellis/tasks/archive/2026-10/10-29-fund-declaration/`：A2 需求、设计、执行计划与验收报告
+- `.trellis/tasks/archive/2026-10/10-29-fund-dup-engine/`：A3 需求、设计、执行计划与测试用例
+- `.trellis/spec/backend/analysis-guidelines.md`：分析口径、接口、归因与降级契约
 - `.trellis/tasks/10-29-fund-dup-platform/`：整体规划、设计、子任务拆分
 
 ## 常见问题

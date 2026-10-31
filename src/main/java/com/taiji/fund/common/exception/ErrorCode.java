@@ -33,6 +33,18 @@ public enum ErrorCode {
     FILE_LIMIT_EXCEEDED(40032, "单个项目最多 10 个附件", 400),
     FILE_NOT_FOUND(40420, "附件不存在", 404),
 
+    ANALYSIS_CONFIG_INVALID(40040, "分析配置不合法", 400),
+    ANALYSIS_WEIGHT_INVALID(40041, "字段权重配置不合法", 400),
+    ANALYSIS_THRESHOLD_INVALID(40042, "重复度阈值配置不合法", 400),
+    ANALYSIS_TEXT_REQUIRED(40043, "分析文本不能为空", 400),
+    ANALYSIS_LLM_CONFIG_INVALID(40044, "大模型配置不合法", 400),
+
+    ANALYSIS_RUN_NOT_FOUND(40430, "分析运行不存在", 404),
+    ANALYSIS_PAIR_NOT_FOUND(40431, "分析项目对不存在", 404),
+    ANALYSIS_SNAPSHOT_NOT_FOUND(40432, "项目分析快照不存在", 404),
+
+    ANALYSIS_RUN_CONFLICT(40930, "已有分析任务正在运行", 409),
+
     INTERNAL_ERROR(50000, "服务器内部错误", 500);
 
     private final int code;

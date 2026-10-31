@@ -2,21 +2,21 @@
 
 ## 1. 顺序清单
 
-- [ ] Flyway `V4__analysis_schema.sql` + 默认配置种子；H2 启动验证。
-- [ ] 配置实体/服务/接口：校验、版本、审计。
-- [ ] `TextNormalizer`、`StopWords`、`TermDictionary`、`ChineseTokenizer`。
-- [ ] `TfIdfVectorizer`、`SparseVector`、`CosineSimilarity`、`JaccardSimilarity`。
-- [ ] `ProjectAnalysisInput` 构建（结构化字段 + 附件文本回退 + 标签）。
-- [ ] `DimensionScorer`（5 维度）、`ScoreFusion`（权重归一化）、`DuplicateLevel`。
-- [ ] `AttributionResolver`（同组/在先/同期，落 `earlier_project_id`）。
-- [ ] `MatchSnippetExtractor`（Top 词 + 原文片段 + 差异点）。
-- [ ] `LlmClient`（RestTemplate）、Prompt、响应校验、缓存、熔断、`llm_call_log`。
-- [ ] `AnalysisExecutor`：全量/单项目/预检流程、并发保护、事务、失败清理。
-- [ ] 快照聚合与 `project.duplicate_score/risk_level` 回写。
-- [ ] 查询服务与接口：报告、Top-K、项目对、运行历史。
-- [ ] 单元测试夹具（相同/无关/部分重叠/跨组时间边界）与降级测试。
-- [ ] 性能测试：300 项目夹具计时并记录。
-- [ ] 分析配置页面（管理员）与分析运行/报告页面（前端最小闭环）。
+- [x] Flyway `V4__analysis_schema.sql` + 默认配置种子；H2 启动验证。
+- [x] 配置实体/服务/接口：校验、版本、审计。
+- [x] `TextNormalizer`、`StopWords`、`TermDictionary`、`ChineseTokenizer`。
+- [x] `TfIdfVectorizer`、`SparseVector`、`CosineSimilarity`、`JaccardSimilarity`。
+- [x] `ProjectAnalysisInput` 构建（结构化字段 + 附件文本回退 + 标签）。
+- [x] `DimensionScorer`（5 维度）、`ScoreFusion`（权重归一化）、`DuplicateLevel`。
+- [x] `AttributionResolver`（同组/在先/同期，落 `earlier_project_id`）。
+- [x] `MatchSnippetExtractor`（Top 词 + 原文片段 + 差异点）。
+- [x] `LlmClient`（RestTemplate）、Prompt、响应校验、缓存、熔断、`llm_call_log`。
+- [x] `AnalysisExecutor`：全量/单项目/预检流程、并发保护、事务、失败清理。
+- [x] 快照聚合与 `project.duplicate_score/risk_level` 回写。
+- [x] 查询服务与接口：报告、Top-K、项目对、运行历史。
+- [x] 单元测试夹具（相同/无关/部分重叠/跨组时间边界）与降级测试。
+- [x] 性能测试：300 项目夹具计时并记录。
+- [x] 分析配置页面（管理员）与分析运行/报告页面（前端最小闭环）。
 
 ## 2. 验证命令
 

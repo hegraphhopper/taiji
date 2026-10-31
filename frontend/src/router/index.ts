@@ -52,6 +52,18 @@ const routes: RouteRecordRaw[] = [
         name: 'project-edit',
         component: () => import('@/views/project/ProjectFormView.vue'),
         meta: { title: '编辑项目' }
+      },
+      {
+        path: 'analysis/runs',
+        name: 'analysis-runs',
+        component: () => import('@/views/analysis/AnalysisRunsView.vue'),
+        meta: { title: '分析运行', roles: ['PMO', 'ADMIN'] }
+      },
+      {
+        path: 'analysis/config',
+        name: 'analysis-config',
+        component: () => import('@/views/analysis/AnalysisConfigView.vue'),
+        meta: { title: '分析配置', roles: ['ADMIN'] }
       }
     ]
   },

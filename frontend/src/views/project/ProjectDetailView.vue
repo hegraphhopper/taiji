@@ -151,7 +151,148 @@
           </el-tab-pane>
 
           <el-tab-pane label="重复度" name="duplicate">
-            <el-empty description="重复度分析将在 A3 阶段接入，当前仅保留入口" :image-size="88" />
+            <div v-loading="analysisLoading" class="duplicate-pane">
+              <el-empty
+                v-if="!analysisLoading && (!analysis || !analysis.analyzed)"
+                description="尚未分析"
+                :image-size="88"
+              >
+                <p class="empty-hint">
+                  该项目尚未参与重复度分析。PMO 可在「分析中心 → 分析运行」触发全量或单项目分析。
+                </p>
+                <el-button type="primary" plain :loading="analysisLoading" @click="loadAnalysis">
+                  重新查询
+                </el-button>
+              </el-empty>
+
+              <template v-else-if="analysis">
+                <div class="analysis-head">
+                  <div>
+                    <h3>重复度快照</h3>
+                    <p class="faint">
+                      分析日期 {{ analysis.snapshot?.analysisDate || '—' }} · 运行 #{{ analysis.snapshot?.runId ?? '—' }}
+                    </p>
+                  </div>
+                  <el-button text :icon="Refresh" :loading="analysisLoading" @click="loadAnalysis">刷新</el-button>
+                </div>
+
+                <div class="kpi-grid">
+                  <article class="kpi-card">
+                    <span class="kpi-label">最高重复度</span>
+                    <strong class="kpi-value">{{ formatScore(analysis.snapshot?.maxScore) }}</strong>
+                    <el-tag size="small" :type="levelTagType(analysis.riskLevel)" effect="light">
+                      {{ levelLabel(analysis.riskLevel) }}
+                    </el-tag>
+                  </article>
+                  <article class="kpi-card">
+                    <span class="kpi-label">Top-K 平均分</span>
+                    <strong class="kpi-value">{{ formatScore(analysis.snapshot?.avgTopScore) }}</strong>
+                    <span class="kpi-hint">按本项目最相似项目计算</span>
+                  </article>
+                  <article class="kpi-card">
+                    <span class="kpi-label">高风险对数</span>
+                    <strong class="kpi-value">{{ analysis.snapshot?.highPairCount ?? 0 }}</strong>
+                    <span class="kpi-hint">总分 ≥ {{ analysis.thresholds?.high ?? 80 }}</span>
+                  </article>
+                  <article class="kpi-card">
+                    <span class="kpi-label">风险敞口</span>
+                    <strong class="kpi-value">{{ formatMoney(analysis.snapshot?.riskExposure) }}</strong>
+                    <span class="kpi-hint">预算 × 最高分 / 100</span>
+                  </article>
+                </div>
+
+                <div class="attr-line">
+                  <span>归因分布：</span>
+                  <el-tag size="small" type="info" effect="plain">同组 {{ analysis.snapshot?.selfGroupCount ?? 0 }}</el-tag>
+                  <el-tag size="small" type="warning" effect="plain">跨组 {{ analysis.snapshot?.crossGroupCount ?? 0 }}</el-tag>
+                  <el-tag size="small" type="danger" effect="plain">我方在先 {{ analysis.snapshot?.ourEarlierCount ?? 0 }}</el-tag>
+                  <el-tag size="small" type="primary" effect="plain">他方在先 {{ analysis.snapshot?.peerEarlierCount ?? 0 }}</el-tag>
+                  <el-tag size="small" type="success" effect="plain">同期并行 {{ analysis.snapshot?.simultaneousCount ?? 0 }}</el-tag>
+                </div>
+
+                <h3 class="block-title">Top-{{ analysis.topPeers.length }} 相似项目</h3>
+                <el-table :data="analysis.topPeers" size="small" border>
+                  <el-table-column label="相似项目" min-width="220">
+                    <template #default="{ row }">
+                      <div class="peer-name">{{ row.peer.name }}</div>
+                      <div class="faint peer-meta">{{ row.peer.code }} · {{ row.peer.groupName || '未归组' }}</div>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="总分" width="90" align="right">
+                    <template #default="{ row }">
+                      <strong>{{ formatScore(row.totalScore) }}</strong>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="等级" width="90" align="center">
+                    <template #default="{ row }">
+                      <el-tag size="small" :type="levelTagType(row.level)" effect="light">{{ levelLabel(row.level) }}</el-tag>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="归因" width="120" align="center">
+                    <template #default="{ row }">{{ directionLabel(row.direction) }}</template>
+                  </el-table-column>
+                  <el-table-column label="目标" width="74" align="right">
+                    <template #default="{ row }">{{ formatScore(row.scores.goal) }}</template>
+                  </el-table-column>
+                  <el-table-column label="内容" width="74" align="right">
+                    <template #default="{ row }">{{ formatScore(row.scores.content) }}</template>
+                  </el-table-column>
+                  <el-table-column label="技术" width="74" align="right">
+                    <template #default="{ row }">{{ formatScore(row.scores.tech) }}</template>
+                  </el-table-column>
+                  <el-table-column label="节点" width="74" align="right">
+                    <template #default="{ row }">{{ formatScore(row.scores.milestone) }}</template>
+                  </el-table-column>
+                  <el-table-column label="标签" width="74" align="right">
+                    <template #default="{ row }">{{ formatScore(row.scores.tag) }}</template>
+                  </el-table-column>
+                </el-table>
+
+                <h3 class="block-title">重复点与差异点</h3>
+                <el-empty v-if="analysis.topPeers.length === 0" description="本次运行未产生相似项目" :image-size="72" />
+                <el-collapse v-else>
+                  <el-collapse-item
+                    v-for="peer in analysis.topPeers"
+                    :key="peer.peer.id"
+                    :name="peer.peer.id"
+                  >
+                    <template #title>
+                      <span class="collapse-title">
+                        {{ peer.peer.name }}
+                        <el-tag size="small" :type="levelTagType(peer.level)" effect="plain">{{ formatScore(peer.totalScore) }}</el-tag>
+                      </span>
+                    </template>
+                    <div class="point-grid">
+                      <div class="point-block">
+                        <h4>重复点</h4>
+                        <el-empty v-if="peer.matchedPoints.length === 0" description="无匹配片段" :image-size="48" />
+                        <div v-for="(point, index) in peer.matchedPoints" :key="`m-${index}`" class="point">
+                          <strong>{{ dimensionLabel(point.dimension) }}</strong>
+                          <span class="terms">{{ point.terms.join('、') }}</span>
+                          <p>{{ point.snippet }}</p>
+                        </div>
+                      </div>
+                      <div class="point-block">
+                        <h4>差异点</h4>
+                        <el-empty v-if="peer.diffPoints.length === 0" description="无差异片段" :image-size="48" />
+                        <div v-for="(point, index) in peer.diffPoints" :key="`d-${index}`" class="point">
+                          <strong>{{ dimensionLabel(point.dimension) }}</strong>
+                          <span class="terms">{{ point.terms.join('、') }}</span>
+                          <p>{{ point.snippet }}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <el-alert
+                      v-if="peer.llmReason"
+                      :title="`大模型补充理由：${peer.llmReason}`"
+                      type="info"
+                      :closable="false"
+                      show-icon
+                    />
+                  </el-collapse-item>
+                </el-collapse>
+              </template>
+            </div>
           </el-tab-pane>
         </el-tabs>
       </section>
@@ -202,10 +343,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowLeft, Edit, Upload } from '@element-plus/icons-vue'
+import { ArrowLeft, Edit, Refresh, Upload } from '@element-plus/icons-vue'
 import {
   deleteDocument,
   downloadDocument,
@@ -216,8 +357,11 @@ import {
   saveSections,
   uploadDocument
 } from '@/api/project'
+import { getProjectAnalysis } from '@/api/analysis'
 import { useAuthStore } from '@/stores/auth'
 import type {
+  DuplicateLevel,
+  ProjectAnalysisReport,
   ProjectDetail,
   ProjectDocumentItem,
   SectionPreview
@@ -247,6 +391,9 @@ const previewVisible = ref(false)
 const preview = ref<SectionPreview | null>(null)
 const previewDocument = ref<ProjectDocumentItem | null>(null)
 const applying = ref(false)
+const analysis = ref<ProjectAnalysisReport | null>(null)
+const analysisLoading = ref(false)
+const analysisLoaded = ref(false)
 
 const projectId = computed(() => Number(route.params.id))
 const canManage = computed(() => auth.hasRole('ADMIN', 'PMO', 'GROUP_USER'))
@@ -258,6 +405,27 @@ const canSubmit = computed(() => canEdit.value)
 const canWithdraw = computed(() => canManage.value && project.value?.status === 'SUBMITTED')
 
 onMounted(load)
+
+watch(activeTab, (tab) => {
+  if (tab === 'duplicate' && !analysisLoaded.value) {
+    loadAnalysis()
+  }
+})
+
+async function loadAnalysis(): Promise<void> {
+  if (analysisLoading.value) {
+    return
+  }
+  analysisLoading.value = true
+  try {
+    analysis.value = await getProjectAnalysis(projectId.value)
+    analysisLoaded.value = true
+  } catch (exception) {
+    ElMessage.error(exception instanceof Error ? exception.message : '重复度分析加载失败')
+  } finally {
+    analysisLoading.value = false
+  }
+}
 
 async function load(): Promise<void> {
   loading.value = true
@@ -462,6 +630,53 @@ function parseTagType(status: string): 'info' | 'success' | 'danger' {
   return 'info'
 }
 
+function levelLabel(level: DuplicateLevel | string | null | undefined): string {
+  const labels: Record<string, string> = {
+    HIGH: '高重复',
+    MEDIUM: '中重复',
+    LOW: '低重复',
+    NONE: '无明显重复'
+  }
+  return level ? labels[level] || level : '—'
+}
+
+function levelTagType(
+  level: DuplicateLevel | string | null | undefined
+): 'danger' | 'warning' | 'info' | 'success' {
+  if (level === 'HIGH') return 'danger'
+  if (level === 'MEDIUM') return 'warning'
+  if (level === 'LOW') return 'info'
+  return 'success'
+}
+
+function directionLabel(direction: string | null | undefined): string {
+  const labels: Record<string, string> = {
+    SELF_GROUP: '同组内部',
+    SIMULTANEOUS: '同期并行',
+    OUR_EARLIER: '我方在先',
+    PEER_EARLIER: '他方在先'
+  }
+  return direction ? labels[direction] || direction : '—'
+}
+
+function dimensionLabel(dimension: string): string {
+  const labels: Record<string, string> = {
+    goal: '项目目标',
+    content: '研制内容',
+    tech: '关键技术',
+    milestone: '节点计划',
+    tag: '技术标签'
+  }
+  return labels[dimension] || dimension
+}
+
+function formatScore(value: number | null | undefined): string {
+  if (value === null || value === undefined) {
+    return '—'
+  }
+  return value.toFixed(2)
+}
+
 function formatSize(size: number): string {
   if (size < 1024) return `${size} B`
   if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`
@@ -607,12 +822,151 @@ function formatSize(size: number): string {
   line-height: 1.8;
 }
 
+.duplicate-pane {
+  min-height: 220px;
+}
+
+.empty-hint {
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.analysis-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.analysis-head h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-strong);
+}
+
+.analysis-head p {
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-subtle);
+}
+
+.kpi-label {
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.kpi-value {
+  font-size: 24px;
+  line-height: 1.1;
+  font-weight: 600;
+  color: var(--ink-strong);
+}
+
+.kpi-hint {
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+.attr-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+.block-title {
+  margin: 22px 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-strong);
+}
+
+.peer-name {
+  font-size: 13px;
+  color: var(--ink-strong);
+}
+
+.peer-meta {
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.collapse-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.point-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.point-block h4 {
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: var(--ink-strong);
+}
+
+.point {
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-subtle);
+  font-size: 12px;
+}
+
+.point .terms {
+  margin-left: 8px;
+  color: var(--brand-primary);
+}
+
+.point p {
+  margin-top: 6px;
+  color: var(--ink);
+  line-height: 1.8;
+}
+
+@media (max-width: 1180px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 900px) {
   .heading-actions {
     width: 100%;
   }
 
-  .preview-grid {
+  .preview-grid,
+  .point-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kpi-grid {
     grid-template-columns: 1fr;
   }
 }

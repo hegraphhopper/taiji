@@ -3,7 +3,7 @@
   "name": "fund-dup-engine",
   "title": "重复度分析引擎",
   "description": "多维文本相似度、权重配置、分析运行、相似对与快照持久化、分析 API",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,

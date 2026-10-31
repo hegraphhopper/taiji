@@ -214,3 +214,187 @@ export interface SectionPreview {
   indicators: string[]
 }
 
+export type AnalysisTriggerType = 'FULL' | 'PROJECT' | 'PRECHECK'
+
+export type AnalysisRunStatus = 'RUNNING' | 'SUCCESS' | 'FAILED'
+
+export type DuplicateLevel = 'HIGH' | 'MEDIUM' | 'LOW' | 'NONE'
+
+export type AnalysisDirection =
+  | 'SELF_GROUP'
+  | 'SIMULTANEOUS'
+  | 'OUR_EARLIER'
+  | 'PEER_EARLIER'
+
+export interface AnalysisConfig {
+  id: number
+  version: number
+  fieldWeights: Record<string, number>
+  thresholds: Record<string, number>
+  topK: number
+  simultaneousDays: number
+  llmEnabled: boolean
+  localWeight: number
+  llmWeight: number
+  llmTopN: number
+  llmTimeoutMs: number
+  active: boolean
+  createdBy: number | null
+  createdAt: string | null
+}
+
+export interface AnalysisConfigPayload {
+  fieldWeights: Record<string, number>
+  thresholds: Record<string, number>
+  topK: number
+  simultaneousDays: number
+  llmEnabled: boolean
+  localWeight: number
+  llmWeight: number
+  llmTopN: number
+  llmTimeoutMs: number
+}
+
+export interface AnalysisRun {
+  id: number
+  triggerType: AnalysisTriggerType
+  projectId: number | null
+  configVersion: number
+  analysisDate: string | null
+  status: AnalysisRunStatus
+  projectCount: number
+  pairCount: number
+  llmUsed: boolean
+  durationMs: number | null
+  message: string | null
+  operatorId: number | null
+  createdAt: string | null
+}
+
+export interface AnalysisRunPayload {
+  triggerType: AnalysisTriggerType
+  projectId?: number | null
+  analysisDate?: string | null
+}
+
+export interface AnalysisRunQueryParams {
+  triggerType?: string
+  status?: string
+  from?: string
+  to?: string
+  page: number
+  size: number
+}
+
+export interface AnalysisProjectBrief {
+  id: number
+  code: string
+  name: string
+  groupId: number | null
+  groupName: string | null
+  ownerId: number | null
+  ownerName: string | null
+  techDirectionId: number | null
+  techDirectionName: string | null
+  status: string
+  budget: number | null
+  submitTime: string | null
+}
+
+export interface DimensionScores {
+  goal: number
+  content: number
+  tech: number
+  milestone: number
+  tag: number
+}
+
+export interface MatchPoint {
+  dimension: string
+  terms: string[]
+  snippet: string
+}
+
+export interface PeerMatch {
+  pairId: number | null
+  runId: number
+  peer: AnalysisProjectBrief
+  scores: DimensionScores
+  localScore: number
+  llmScore: number | null
+  totalScore: number
+  level: DuplicateLevel
+  relation: string
+  direction: AnalysisDirection
+  earlierProjectId: number | null
+  matchedPoints: MatchPoint[]
+  diffPoints: MatchPoint[]
+  llmReason: string | null
+  suggestion: string | null
+}
+
+export interface DuplicateSnapshot {
+  id: number
+  runId: number
+  projectId: number
+  groupId: number | null
+  analysisDate: string
+  maxScore: number
+  avgTopScore: number
+  highPairCount: number
+  crossGroupCount: number
+  selfGroupCount: number
+  ourEarlierCount: number
+  peerEarlierCount: number
+  simultaneousCount: number
+  riskExposure: number | null
+  createdAt: string | null
+}
+
+export interface ProjectAnalysisReport {
+  project: AnalysisProjectBrief
+  snapshot: DuplicateSnapshot | null
+  topPeers: PeerMatch[]
+  riskLevel: DuplicateLevel | null
+  thresholds: Record<string, number>
+  analyzed: boolean
+}
+
+export interface PairDetail {
+  pairId: number
+  runId: number
+  analysisDate: string | null
+  project: AnalysisProjectBrief
+  peer: AnalysisProjectBrief
+  scores: DimensionScores
+  localScore: number
+  llmScore: number | null
+  totalScore: number
+  level: DuplicateLevel
+  relation: string
+  direction: AnalysisDirection
+  earlierProjectId: number | null
+  matchedPoints: MatchPoint[]
+  diffPoints: MatchPoint[]
+  llmReason: string | null
+  createdAt: string | null
+}
+
+export interface AnalysisPrecheckPayload {
+  projectId?: number | null
+  goalText?: string
+  contentText?: string
+  techText?: string
+  milestoneText?: string
+  techDirectionId?: number | null
+}
+
+export interface AnalysisPrecheckResult {
+  runId: number
+  projectId: number | null
+  peerCount: number
+  configVersion: number
+  topPeers: PeerMatch[]
+}
+
+

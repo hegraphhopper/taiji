@@ -22,6 +22,7 @@ frontend/
       auth.ts                    login/logout/me/changePassword
       system.ts                 dicts/groups/tech-directions
       project.ts                项目 CRUD、状态动作、附件上传/解析/下载
+      analysis.ts               分析配置、运行触发/历史/删除、项目报告、项目对、预检
     stores/
       auth.ts                    token/user/roles/permissions、登录/登出/改密
       dict.ts                    字典缓存、在途请求去重
@@ -33,6 +34,8 @@ frontend/
       project/ProjectListView.vue
       project/ProjectFormView.vue
       project/ProjectDetailView.vue
+      analysis/AnalysisConfigView.vue   分析配置（ADMIN）
+      analysis/AnalysisRunsView.vue     分析运行（PMO/ADMIN）
       error/ForbiddenView.vue
       error/NotFoundView.vue
     styles/tokens.css            设计 token

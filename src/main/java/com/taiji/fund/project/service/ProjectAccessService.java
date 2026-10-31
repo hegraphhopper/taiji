@@ -49,20 +49,36 @@ public class ProjectAccessService {
     }
 
     public void assertCanView(Project project) {
-        if (isUnrestricted()) {
+        if (canView(project)) {
             return;
         }
-        LoginUser user = currentUser();
+        throw new BizException(ErrorCode.FORBIDDEN, "无权访问该项目");
+    }
+
+    /**
+     * 只读判断：不抛异常，供「多主体任一方可见」场景（如项目对明细）使用。
+     */
+    public boolean canView(Project project) {
+        if (project == null) {
+            return false;
+        }
+        if (isUnrestricted()) {
+            return true;
+        }
+        LoginUser user = SecurityUtils.currentUserOrNull();
+        if (user == null) {
+            return false;
+        }
         if (user.getRoles().contains(RoleCode.GROUP_USER.name())
                 && project.getGroupId() != null && project.getGroupId().equals(user.getGroupId())) {
-            return;
+            return true;
         }
         if (user.getRoles().contains(RoleCode.EXPERT.name())
                 && user.getGroupId() != null && user.getGroupId().equals(project.getGroupId())
                 && !ProjectStatus.DRAFT.getCode().equals(project.getStatus())) {
-            return;
+            return true;
         }
-        throw new BizException(ErrorCode.FORBIDDEN, "无权访问该项目");
+        return false;
     }
 
     public void assertCanEdit(Project project) {
