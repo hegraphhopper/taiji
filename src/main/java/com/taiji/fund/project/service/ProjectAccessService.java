@@ -37,10 +37,10 @@ public class ProjectAccessService {
     }
 
     public void assertCanCreate(Long groupId) {
-        if (isUnrestricted()) {
+        LoginUser user = currentUser();
+        if (user.getRoles().contains(RoleCode.ADMIN.name())) {
             return;
         }
-        LoginUser user = currentUser();
         if (user.getRoles().contains(RoleCode.GROUP_USER.name())
                 && groupId != null && groupId.equals(user.getGroupId())) {
             return;
@@ -73,19 +73,21 @@ public class ProjectAccessService {
                 && project.getGroupId() != null && project.getGroupId().equals(user.getGroupId())) {
             return true;
         }
-        if (user.getRoles().contains(RoleCode.EXPERT.name())
-                && user.getGroupId() != null && user.getGroupId().equals(project.getGroupId())
-                && !ProjectStatus.DRAFT.getCode().equals(project.getStatus())) {
-            return true;
+        if (user.getRoles().contains(RoleCode.EXPERT.name())) {
+            if (ProjectStatus.REVIEWING.getCode().equals(project.getStatus())) {
+                return true;
+            }
+            return user.getGroupId() != null && user.getGroupId().equals(project.getGroupId())
+                    && !ProjectStatus.DRAFT.getCode().equals(project.getStatus());
         }
         return false;
     }
 
     public void assertCanEdit(Project project) {
-        if (isUnrestricted()) {
+        LoginUser user = currentUser();
+        if (user.getRoles().contains(RoleCode.ADMIN.name())) {
             return;
         }
-        LoginUser user = currentUser();
         if (user.getRoles().contains(RoleCode.GROUP_USER.name())
                 && project.getGroupId() != null && project.getGroupId().equals(user.getGroupId())) {
             return;

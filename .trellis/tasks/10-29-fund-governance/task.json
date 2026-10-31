@@ -3,7 +3,7 @@
   "name": "fund-governance",
   "title": "角色权限、系统管理与审批流（收尾）",
   "description": "四类角色细粒度权限、用户/项目组/技术方向管理界面、审计查询、形式审查与专家评审、审批流闭环",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,

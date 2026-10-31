@@ -50,6 +50,8 @@ public class Project {
 
     private LocalDateTime submitTime;
 
+    private Integer reviewRound;
+
     private Long createdBy;
 
     @TableField(fill = FieldFill.INSERT)

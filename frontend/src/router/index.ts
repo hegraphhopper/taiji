@@ -84,6 +84,48 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '决策规则', roles: ['ADMIN'] }
       },
       {
+        path: 'tasks/todo',
+        name: 'tasks-todo',
+        component: () => import('@/views/tasks/TodoView.vue'),
+        meta: { title: '待办中心' }
+      },
+      {
+        path: 'review/tasks',
+        name: 'review-tasks',
+        component: () => import('@/views/review/ReviewTaskView.vue'),
+        meta: { title: '评审任务', roles: ['ADMIN', 'EXPERT'] }
+      },
+      {
+        path: 'system/users',
+        name: 'system-users',
+        component: () => import('@/views/system/SystemUsersView.vue'),
+        meta: { title: '用户管理', roles: ['ADMIN'] }
+      },
+      {
+        path: 'system/org',
+        name: 'system-org',
+        component: () => import('@/views/system/SystemOrgView.vue'),
+        meta: { title: '组织与字典', roles: ['ADMIN'] }
+      },
+      {
+        path: 'system/roles',
+        name: 'system-roles',
+        component: () => import('@/views/system/SystemRolesView.vue'),
+        meta: { title: '角色与权限', roles: ['ADMIN'] }
+      },
+      {
+        path: 'system/configs',
+        name: 'system-configs',
+        component: () => import('@/views/system/SystemConfigView.vue'),
+        meta: { title: '系统参数', roles: ['ADMIN'] }
+      },
+      {
+        path: 'system/audit',
+        name: 'system-audit',
+        component: () => import('@/views/system/SystemAuditView.vue'),
+        meta: { title: '审计日志', roles: ['ADMIN'] }
+      },
+      {
         path: 'analysis/runs',
         name: 'analysis-runs',
         component: () => import('@/views/analysis/AnalysisRunsView.vue'),

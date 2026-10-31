@@ -5,7 +5,7 @@
         <h1>项目管理</h1>
         <p>申报书结构化信息、节点计划与审批状态</p>
       </div>
-      <el-button type="primary" :icon="Plus" @click="openCreate">新建项目</el-button>
+          <el-button v-if="canCreate" type="primary" :icon="Plus" @click="openCreate">新建项目</el-button>
     </div>
 
     <section class="card filters">
@@ -184,7 +184,7 @@ const filters = reactive<{
   duplicateScoreMax: null
 })
 
-const canCreate = computed(() => auth.hasRole('ADMIN', 'PMO', 'GROUP_USER'))
+const canCreate = computed(() => auth.hasRole('ADMIN', 'GROUP_USER'))
 
 onMounted(async () => {
   await dict.load()

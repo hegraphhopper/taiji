@@ -151,6 +151,7 @@ public class DemoDataInitializer implements ApplicationRunner {
             project.setStartDate(seed.startDate);
             project.setEndDate(seed.endDate);
             project.setStatus(seed.status);
+            project.setReviewRound(ProjectStatus.REVIEWING.getCode().equals(seed.status) ? 1 : 0);
             project.setSummary(seed.goal);
             project.setExpectedOutcome(String.join("；", seed.contents));
             project.setSubmitTime(seed.submitTime);

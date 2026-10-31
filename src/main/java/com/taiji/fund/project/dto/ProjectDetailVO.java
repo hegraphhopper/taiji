@@ -32,6 +32,9 @@ public class ProjectDetailVO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Integer version;
+    private Integer reviewRound;
+    private Integer reviewPassCount;
+    private Integer requiredPassCount;
 
     private List<ProjectGoalVO> goals;
     private List<ProjectContentVO> contents;
@@ -39,5 +42,6 @@ public class ProjectDetailVO {
     private List<ProjectMilestoneVO> milestones;
     private List<ProjectMemberVO> members;
     private List<ProjectApprovalLogVO> approvalLogs;
+    private List<ProjectReviewVO> reviews;
     private List<ProjectDocumentVO> documents;
 }

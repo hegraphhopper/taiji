@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.taiji.fund.common.enums.RoleCode;
 import com.taiji.fund.common.enums.UserStatus;
 import com.taiji.fund.security.UserDetailsServiceImpl;
+import com.taiji.fund.system.group.Group;
+import com.taiji.fund.system.group.GroupMapper;
 import com.taiji.fund.system.role.Role;
 import com.taiji.fund.system.role.RoleMapper;
 import com.taiji.fund.system.role.UserRole;
@@ -40,11 +42,14 @@ public class DemoAccountInitializer implements ApplicationRunner {
         DEMO_ACCOUNTS.put("pmo01", "Pmo@12345");
         DEMO_ACCOUNTS.put("user01", "User@12345");
         DEMO_ACCOUNTS.put("expert01", "Expert@12345");
+        DEMO_ACCOUNTS.put("expert02", "Expert2@12345");
+        DEMO_ACCOUNTS.put("expert03", "Expert3@12345");
     }
 
     private final UserMapper userMapper;
     private final RoleMapper roleMapper;
     private final UserRoleMapper userRoleMapper;
+    private final GroupMapper groupMapper;
     private final UserDetailsServiceImpl userDetailsService;
     private final PasswordEncoder passwordEncoder;
     private final Environment environment;
@@ -81,7 +86,10 @@ public class DemoAccountInitializer implements ApplicationRunner {
         List<String> initialized = new ArrayList<>();
         DEMO_ACCOUNTS.forEach((username, password) -> {
             User user = findByUsername(username);
-            if (user != null && INIT_PLACEHOLDER.equals(user.getPasswordHash())) {
+            if (user == null) {
+                createDemoUser(username, password);
+                initialized.add(username);
+            } else if (INIT_PLACEHOLDER.equals(user.getPasswordHash())) {
                 updatePassword(user.getId(), password);
                 initialized.add(username);
             }
@@ -89,6 +97,65 @@ public class DemoAccountInitializer implements ApplicationRunner {
         if (!initialized.isEmpty()) {
             log.info("已初始化演示账号密码: {}", String.join(", ", initialized));
         }
+    }
+
+    private void createDemoUser(String username, String password) {
+        User user = new User();
+        user.setUsername(username);
+        user.setPasswordHash(passwordEncoder.encode(password));
+        user.setRealName(realName(username));
+        user.setEmail(username + "@taiji.example");
+        user.setStatus(UserStatus.ENABLED.name());
+        user.setFailCount(0);
+        user.setDeleted(0);
+        if ("user01".equals(username)) {
+            Group group = groupMapper.selectOne(Wrappers.<Group>lambdaQuery()
+                    .eq(Group::getCode, "GRP-INTELLIGENCE"));
+            user.setGroupId(group == null ? null : group.getId());
+        }
+        userMapper.insert(user);
+        bindRole(user.getId(), demoRole(username));
+    }
+
+    private String demoRole(String username) {
+        if ("admin".equals(username)) {
+            return RoleCode.ADMIN.name();
+        }
+        if ("pmo01".equals(username)) {
+            return RoleCode.PMO.name();
+        }
+        if ("user01".equals(username)) {
+            return RoleCode.GROUP_USER.name();
+        }
+        return RoleCode.EXPERT.name();
+    }
+
+    private String realName(String username) {
+        if ("admin".equals(username)) {
+            return "系统管理员";
+        }
+        if ("pmo01".equals(username)) {
+            return "基金办专员";
+        }
+        if ("user01".equals(username)) {
+            return "项目组用户";
+        }
+        return "评审专家" + username.replaceAll("\\D+", "");
+    }
+
+    private void bindRole(Long userId, String roleCode) {
+        List<String> roles = userDetailsService.loadRoles(userId);
+        if (roles.contains(roleCode)) {
+            return;
+        }
+        Role role = roleMapper.selectOne(Wrappers.<Role>lambdaQuery().eq(Role::getCode, roleCode));
+        if (role == null) {
+            throw new IllegalStateException("缺少角色种子数据：" + roleCode);
+        }
+        UserRole userRole = new UserRole();
+        userRole.setUserId(userId);
+        userRole.setRoleId(role.getId());
+        userRoleMapper.insert(userRole);
     }
 
     private void ensureAdminAccount() {

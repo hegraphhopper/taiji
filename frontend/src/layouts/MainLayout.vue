@@ -54,10 +54,29 @@
           <el-icon><Setting /></el-icon>
           <template #title>决策规则</template>
         </el-menu-item>
+        <el-menu-item index="/tasks/todo">
+          <el-icon><Bell /></el-icon>
+          <template #title>待办中心</template>
+        </el-menu-item>
+        <el-menu-item v-if="canReview" index="/review/tasks">
+          <el-icon><Checked /></el-icon>
+          <template #title>评审任务</template>
+        </el-menu-item>
+        <el-sub-menu v-if="isAdmin" index="/system">
+          <template #title>
+            <el-icon><Setting /></el-icon>
+            <span>系统管理</span>
+          </template>
+          <el-menu-item index="/system/users">用户管理</el-menu-item>
+          <el-menu-item index="/system/org">组织与字典</el-menu-item>
+          <el-menu-item index="/system/roles">角色与权限</el-menu-item>
+          <el-menu-item index="/system/configs">系统参数</el-menu-item>
+          <el-menu-item index="/system/audit">审计日志</el-menu-item>
+        </el-sub-menu>
       </el-menu>
 
       <div v-if="!collapsed" class="sidebar-foot">
-        <span class="dot"></span> B2 辅助决策 · 规则优先，大模型补充
+        <span class="dot"></span> C1 治理 · 权限、审批与系统管理
       </div>
     </el-aside>
 
@@ -139,6 +158,8 @@ import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'elem
 import {
   Aim,
   ArrowDown,
+  Bell,
+  Checked,
   DataAnalysis,
   DocumentChecked,
   Expand,
@@ -165,6 +186,7 @@ const canAnalyze = computed(() => auth.hasRole('ADMIN', 'PMO'))
 const canViewTrend = computed(() => auth.hasRole('ADMIN', 'PMO', 'GROUP_USER'))
 const canDecide = computed(() => auth.hasRole('ADMIN', 'PMO', 'GROUP_USER'))
 const canViewRecords = computed(() => auth.hasRole('ADMIN', 'PMO', 'GROUP_USER', 'EXPERT'))
+const canReview = computed(() => auth.hasRole('ADMIN', 'EXPERT'))
 const isAdmin = computed(() => auth.hasRole('ADMIN'))
 
 const passwordVisible = ref(false)

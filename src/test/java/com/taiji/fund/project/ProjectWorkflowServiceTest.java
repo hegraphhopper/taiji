@@ -116,6 +116,11 @@ class ProjectWorkflowServiceTest extends AbstractProjectApiTest {
         long approveId = createDraftId(token, uniqueProjectName("ut09-立项"), owner.getGroupId(), owner.getId());
         saveSections(token, approveId, completeSectionsJson(member.getId()));
         submit(token, approveId);
+        performAction(pmoToken, approveId, "ACCEPT", "形式审查通过", null);
+        User firstExpert = createExpert("ut09e1");
+        User secondExpert = createExpert("ut09e2");
+        review(tokenOf(firstExpert), approveId, "PASS");
+        review(tokenOf(secondExpert), approveId, "PASS");
         JsonNode approved = performAction(pmoToken, approveId, "APPROVE", "同意立项", null);
         assertThat(approved.path("status").asText()).isEqualTo("APPROVED");
 
@@ -181,6 +186,9 @@ class ProjectWorkflowServiceTest extends AbstractProjectApiTest {
         assertThat(readJson(forbidden).path("code").asInt()).isEqualTo(ErrorCode.FORBIDDEN.getCode());
         assertThat(detail(token, projectId).path("status").asText()).isEqualTo("SUBMITTED");
 
+        performAction(pmoToken(), projectId, "ACCEPT", "形式审查通过", null);
+        review(tokenOf(createExpert("ut11e1")), projectId, "PASS");
+        review(tokenOf(createExpert("ut11e2")), projectId, "PASS");
         JsonNode approved = performAction(pmoToken(), projectId, "APPROVE", "基金办确认", null);
         assertThat(approved.path("status").asText()).isEqualTo("APPROVED");
     }

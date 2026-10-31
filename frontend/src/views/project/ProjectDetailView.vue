@@ -19,8 +19,13 @@
         <el-button v-if="canEdit" :icon="Edit" @click="router.push(`/projects/${project.id}/edit`)">编辑</el-button>
         <el-button v-if="canSubmit" type="success" @click="doAction('SUBMIT', '提交')">提交</el-button>
         <el-button v-if="canWithdraw" type="warning" @click="doAction('WITHDRAW', '撤回')">撤回</el-button>
+        <el-button v-if="canAccept" type="primary" @click="doAction('ACCEPT', '形式审查通过')">形式审查</el-button>
         <el-button v-if="canApprove" type="primary" @click="doAction('APPROVE', '确认立项')">确认立项</el-button>
         <el-button v-if="canApprove" type="danger" plain @click="rejectVisible = true">驳回</el-button>
+        <el-button v-if="canReview" type="success" @click="reviewVisible = true">提交评审</el-button>
+        <el-button v-if="canStart" type="success" @click="doAction('START', '开始执行')">开始执行</el-button>
+        <el-button v-if="canComplete" type="primary" @click="doAction('COMPLETE', '结项')">结项</el-button>
+        <el-button v-if="canTerminate" type="danger" plain @click="terminateVisible = true">终止</el-button>
       </div>
     </div>
 
@@ -148,6 +153,28 @@
               </el-timeline-item>
             </el-timeline>
             <el-empty v-else description="暂无审批记录" :image-size="72" />
+          </el-tab-pane>
+
+          <el-tab-pane label="专家评审" name="reviews">
+            <div class="review-summary">
+              当前轮次：第 {{ project.reviewRound || 1 }} 轮 ·
+              PASS {{ project.reviewPassCount || 0 }} / 要求 {{ project.requiredPassCount || 2 }}
+            </div>
+            <el-table :data="project.reviews" size="small" border>
+              <el-table-column prop="round" label="轮次" width="80" />
+              <el-table-column prop="reviewerName" label="专家" width="140" />
+              <el-table-column prop="score" label="评分" width="90" align="right" />
+              <el-table-column label="结论" width="100">
+                <template #default="{ row }">
+                  <el-tag size="small" :type="row.result === 'PASS' ? 'success' : (row.result === 'REJECT' ? 'danger' : 'warning')">
+                    {{ row.result }}
+                  </el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column prop="opinion" label="意见" min-width="240" />
+              <el-table-column prop="createdAt" label="时间" width="170" />
+            </el-table>
+            <el-empty v-if="!project.reviews.length" description="暂无评审记录" :image-size="64" />
           </el-tab-pane>
 
           <el-tab-pane label="重复度" name="duplicate">
@@ -310,6 +337,40 @@
       </template>
     </el-dialog>
 
+    <el-dialog v-model="reviewVisible" title="提交专家评审" width="520px" :close-on-click-modal="false">
+      <el-form label-position="top">
+        <el-form-item label="评分（0-100）" required>
+          <el-input-number v-model="reviewForm.score" :min="0" :max="100" :step="1" class="full" />
+        </el-form-item>
+        <el-form-item label="评审意见" required>
+          <el-input v-model="reviewForm.opinion" type="textarea" :rows="4" maxlength="1000" show-word-limit />
+        </el-form-item>
+        <el-form-item label="结论" required>
+          <el-select v-model="reviewForm.result" class="full">
+            <el-option label="PASS 通过" value="PASS" />
+            <el-option label="REVISE 修改后重审" value="REVISE" />
+            <el-option label="REJECT 不通过" value="REJECT" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="reviewVisible = false">取消</el-button>
+        <el-button type="primary" :loading="acting" @click="submitReview">提交评审</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="terminateVisible" title="终止项目" width="460px" :close-on-click-modal="false">
+      <el-form label-position="top">
+        <el-form-item label="终止意见" required>
+          <el-input v-model="terminateComment" type="textarea" :rows="4" maxlength="1000" show-word-limit />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="terminateVisible = false">取消</el-button>
+        <el-button type="danger" :loading="acting" @click="confirmTerminate">确认终止</el-button>
+      </template>
+    </el-dialog>
+
     <el-dialog v-model="previewVisible" title="解析预览与回填" width="760px">
       <div v-if="preview">
         <el-alert v-if="preview.message" :title="preview.message" type="warning" :closable="false" show-icon />
@@ -358,6 +419,7 @@ import {
   uploadDocument
 } from '@/api/project'
 import { getProjectAnalysis } from '@/api/analysis'
+import { submitProjectReview } from '@/api/governance'
 import { useAuthStore } from '@/stores/auth'
 import type {
   DuplicateLevel,
@@ -386,6 +448,10 @@ const acting = ref(false)
 const activeTab = ref('overview')
 const rejectVisible = ref(false)
 const rejectComment = ref('')
+const reviewVisible = ref(false)
+const reviewForm = ref({ score: 85, opinion: '', result: 'PASS' })
+const terminateVisible = ref(false)
+const terminateComment = ref('')
 const fileInput = ref<HTMLInputElement>()
 const previewVisible = ref(false)
 const preview = ref<SectionPreview | null>(null)
@@ -396,13 +462,30 @@ const analysisLoading = ref(false)
 const analysisLoaded = ref(false)
 
 const projectId = computed(() => Number(route.params.id))
-const canManage = computed(() => auth.hasRole('ADMIN', 'PMO', 'GROUP_USER'))
+const canManage = computed(() => auth.hasRole('ADMIN', 'GROUP_USER'))
 const canApprove = computed(() => auth.hasRole('ADMIN', 'PMO'))
 const canEdit = computed(() =>
   canManage.value && project.value !== null && ['DRAFT', 'REJECTED'].includes(project.value.status)
 )
 const canSubmit = computed(() => canEdit.value)
 const canWithdraw = computed(() => canManage.value && project.value?.status === 'SUBMITTED')
+const canAccept = computed(() => canApprove.value && project.value?.status === 'SUBMITTED')
+const canStart = computed(() => canManage.value && project.value?.status === 'APPROVED')
+const canComplete = computed(() => canManage.value && project.value?.status === 'IN_PROGRESS')
+const canTerminate = computed(() => canApprove.value
+  && ['APPROVED', 'IN_PROGRESS'].includes(project.value?.status || ''))
+const canReview = computed(() => {
+  if (!project.value || project.value.status !== 'REVIEWING') {
+    return false
+  }
+  if (!auth.hasRole('EXPERT', 'ADMIN')) {
+    return false
+  }
+  const round = project.value.reviewRound || 1
+  return !project.value.reviews.some(
+    (review) => review.reviewerId === auth.user?.id && review.round === round
+  )
+})
 
 onMounted(load)
 
@@ -473,6 +556,49 @@ async function confirmReject(): Promise<void> {
     await load()
   } catch (exception) {
     ElMessage.error(exception instanceof Error ? exception.message : '驳回失败')
+  } finally {
+    acting.value = false
+  }
+}
+
+async function submitReview(): Promise<void> {
+  if (!reviewForm.value.opinion.trim()) {
+    ElMessage.warning('请填写评审意见')
+    return
+  }
+  try {
+    acting.value = true
+    await submitProjectReview(projectId.value, {
+      score: reviewForm.value.score,
+      opinion: reviewForm.value.opinion.trim(),
+      result: reviewForm.value.result
+    })
+    reviewVisible.value = false
+    reviewForm.value = { score: 85, opinion: '', result: 'PASS' }
+    ElMessage.success('评审已提交')
+    await load()
+  } catch (exception) {
+    ElMessage.error(exception instanceof Error ? exception.message : '评审提交失败')
+  } finally {
+    acting.value = false
+  }
+}
+
+async function confirmTerminate(): Promise<void> {
+  if (!terminateComment.value.trim()) {
+    ElMessage.warning('请填写终止意见')
+    return
+  }
+  try {
+    acting.value = true
+    await projectAction(projectId.value, 'TERMINATE', terminateComment.value.trim(),
+      project.value?.version)
+    terminateVisible.value = false
+    terminateComment.value = ''
+    ElMessage.success('项目已终止')
+    await load()
+  } catch (exception) {
+    ElMessage.error(exception instanceof Error ? exception.message : '终止失败')
   } finally {
     acting.value = false
   }
@@ -609,8 +735,12 @@ function actionLabel(action: string): string {
   const labels: Record<string, string> = {
     SUBMIT: '提交申报',
     WITHDRAW: '撤回申报',
+    ACCEPT: '形式审查通过',
     APPROVE: '确认立项',
-    REJECT: '驳回申报'
+    REJECT: '驳回申报',
+    START: '开始执行',
+    COMPLETE: '结项',
+    TERMINATE: '终止项目'
   }
   return labels[action] || action
 }
@@ -796,6 +926,19 @@ function formatSize(size: number): string {
   margin-top: 6px;
   color: var(--ink);
   font-size: 12px;
+}
+
+.review-summary {
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--brand-primary-soft);
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.full {
+  width: 100%;
 }
 
 .preview-grid {

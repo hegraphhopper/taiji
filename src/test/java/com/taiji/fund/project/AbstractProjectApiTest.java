@@ -80,6 +80,18 @@ public abstract class AbstractProjectApiTest extends AbstractApiTest {
         return createUser(prefix, PASSWORD, UserStatus.ENABLED, groupId, RoleCode.GROUP_USER, 0);
     }
 
+    protected User createExpert(String prefix) {
+        return createUser(prefix, PASSWORD, UserStatus.ENABLED, null, RoleCode.EXPERT, 0);
+    }
+
+    protected void review(String token, long projectId, String result) throws Exception {
+        mockMvc.perform(post("/api/v1/projects/{id}/reviews", projectId)
+                        .header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"score\":85,\"opinion\":\"自动化测试评审\",\"result\":\"" + result + "\"}"))
+                .andExpect(status().isOk());
+    }
+
     protected String tokenOf(User user) throws Exception {
         return loginToken(user.getUsername(), PASSWORD);
     }

@@ -20,4 +20,6 @@ public class TechDirectionVO {
     private List<String> keywords;
 
     private Integer sort;
+
+    private Integer enabled;
 }

@@ -79,6 +79,9 @@ class ProjectDeleteAndAuditTest extends AbstractProjectApiTest {
         long projectId = createDraftId(token, uniqueProjectName("ut15-项目"), owner.getGroupId(), owner.getId());
         saveSections(token, projectId, completeSectionsJson(member.getId()));
         submit(token, projectId);
+        performAction(pmoToken, projectId, "ACCEPT", "形式审查通过", null);
+        review(tokenOf(createExpert("ut15e1")), projectId, "PASS");
+        review(tokenOf(createExpert("ut15e2")), projectId, "PASS");
         performAction(pmoToken, projectId, "APPROVE", "审计用例确认", null);
 
         assertActionSucceeded(owner.getId(), "PROJECT_CREATE");

@@ -18,4 +18,6 @@ public class GroupVO {
     private String leader;
 
     private Integer sort;
+
+    private Integer enabled;
 }

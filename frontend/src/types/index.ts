@@ -18,6 +18,7 @@ export interface TechDirection {
   parentId: number | null
   keywords: string[]
   sort: number
+  enabled?: number
 }
 
 export interface Dicts {
@@ -55,6 +56,7 @@ export interface GroupItem {
   parentId: number | null
   leader: string | null
   sort: number
+  enabled?: number
 }
 
 export interface PageResult<T> {
@@ -149,12 +151,16 @@ export interface ProjectDetail extends ProjectListItem {
   summary: string | null
   expectedOutcome: string | null
   createdAt: string | null
+  reviewRound: number | null
+  reviewPassCount: number | null
+  requiredPassCount: number | null
   goals: ProjectGoalItem[]
   contents: ProjectContentItem[]
   keyTechs: ProjectKeyTechItem[]
   milestones: ProjectMilestoneItem[]
   members: ProjectMemberItem[]
   approvalLogs: ProjectApprovalLog[]
+  reviews: ProjectReview[]
   documents: ProjectDocumentItem[]
 }
 
@@ -658,4 +664,129 @@ export interface DecisionRuleItem {
   action: DecisionAction
   description: string | null
   enabled: number
+}
+
+export interface ProjectReview {
+  id: number
+  projectId: number
+  reviewerId: number
+  reviewerName: string | null
+  round: number
+  score: number
+  opinion: string
+  result: 'PASS' | 'REJECT' | 'REVISE'
+  createdAt: string | null
+}
+
+export interface SystemUser {
+  id: number
+  username: string
+  realName: string | null
+  email: string | null
+  phone: string | null
+  groupId: number | null
+  groupName: string | null
+  status: string
+  roles: string[]
+  lastLoginAt: string | null
+  createdAt: string | null
+}
+
+export interface SystemUserPayload {
+  username: string
+  password?: string
+  realName?: string | null
+  email?: string | null
+  phone?: string | null
+  groupId?: number | null
+  status: string
+  roles: string[]
+}
+
+export interface PasswordResetResult {
+  userId: number
+  username: string
+  temporaryPassword: string
+}
+
+export interface RolePermissionItem {
+  code: string
+  label: string
+  roles: string[]
+}
+
+export interface RolePermission {
+  id: number
+  code: string
+  name: string
+  description: string | null
+  permissions: RolePermissionItem[]
+}
+
+export interface SystemConfigItem {
+  key: string
+  value: string
+  description: string | null
+  updatedBy: number | null
+  updatedAt: string | null
+}
+
+export interface AuditLogItem {
+  id: number
+  userId: number | null
+  username: string | null
+  action: string
+  resourceType: string | null
+  resourceId: string | null
+  detail: string | null
+  ip: string | null
+  result: string | null
+  costMs: number | null
+  createdAt: string | null
+}
+
+export interface AuditLogQueryParams {
+  from?: string | null
+  to?: string | null
+  username?: string | null
+  action?: string | null
+  resourceType?: string | null
+  result?: string | null
+  page: number
+  size: number
+}
+
+export interface TodoItem {
+  projectId: number
+  code: string
+  name: string
+  groupId: number | null
+  groupName: string | null
+  status: string
+  action: string
+  actionLabel: string
+}
+
+export interface TodoSummary {
+  total: number
+  counts: Record<string, number>
+  items: TodoItem[]
+}
+
+export interface GroupSavePayload {
+  name: string
+  code: string
+  parentId?: number | null
+  leader?: string | null
+  sort?: number
+  enabled?: number
+}
+
+export interface TechDirectionSavePayload {
+  name: string
+  code: string
+  parentId?: number | null
+  keywords?: string[]
+  sort?: number
+  enabled?: number
 }

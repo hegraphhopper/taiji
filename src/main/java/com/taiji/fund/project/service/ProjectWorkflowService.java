@@ -18,6 +18,7 @@ import com.taiji.fund.project.mapper.ProjectGoalMapper;
 import com.taiji.fund.project.mapper.ProjectMapper;
 import com.taiji.fund.project.mapper.ProjectMilestoneMapper;
 import com.taiji.fund.security.LoginUser;
+import com.taiji.fund.system.config.ReviewConfigService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +38,8 @@ public class ProjectWorkflowService {
     private final ProjectApprovalLogMapper approvalLogMapper;
     private final ProjectAccessService accessService;
     private final ProjectQueryService queryService;
+    private final ProjectReviewService reviewService;
+    private final ReviewConfigService reviewConfigService;
 
     @Transactional
     @Audit(action = "PROJECT_SUBMIT", resourceType = "PROJECT")
@@ -72,15 +75,80 @@ public class ProjectWorkflowService {
     }
 
     @Transactional
+    @Audit(action = "PROJECT_ACCEPT", resourceType = "PROJECT")
+    public ProjectDetailVO accept(Long id, ProjectActionRequest request) {
+        assertApprover();
+        Project project = load(id);
+        if (!ProjectStatus.SUBMITTED.getCode().equals(project.getStatus())) {
+            throw new BizException(ErrorCode.PROJECT_ILLEGAL_TRANSITION, "仅已提交项目可通过形式审查");
+        }
+        Integer round = project.getReviewRound() == null ? 0 : project.getReviewRound();
+        project.setReviewRound(round + 1);
+        transition(project, ProjectStatus.REVIEWING.getCode(), ProjectAction.ACCEPT,
+                trim(request.getComment()), request);
+        return queryService.detail(id);
+    }
+
+    @Transactional
     @Audit(action = "PROJECT_APPROVE", resourceType = "PROJECT")
     public ProjectDetailVO approve(Long id, ProjectActionRequest request) {
         assertApprover();
         Project project = load(id);
-        if (!ProjectStatus.SUBMITTED.getCode().equals(project.getStatus())) {
-            throw new BizException(ErrorCode.PROJECT_ILLEGAL_TRANSITION, "仅已提交项目可确认立项");
+        if (!ProjectStatus.REVIEWING.getCode().equals(project.getStatus())) {
+            throw new BizException(ErrorCode.PROJECT_ILLEGAL_TRANSITION, "仅评审中项目可确认立项");
+        }
+        int required = reviewConfigService.requiredPassCount();
+        int passed = reviewService.passCount(id);
+        if (passed < required) {
+            throw new BizException(ErrorCode.BAD_REQUEST,
+                    "立项需要至少 " + required + " 位专家 PASS，当前 " + passed + " 位");
         }
         transition(project, ProjectStatus.APPROVED.getCode(), ProjectAction.APPROVE,
                 trim(request.getComment()), request);
+        return queryService.detail(id);
+    }
+
+    @Transactional
+    @Audit(action = "PROJECT_START", resourceType = "PROJECT")
+    public ProjectDetailVO start(Long id, ProjectActionRequest request) {
+        Project project = load(id);
+        accessService.assertCanEdit(project);
+        if (!ProjectStatus.APPROVED.getCode().equals(project.getStatus())) {
+            throw new BizException(ErrorCode.PROJECT_ILLEGAL_TRANSITION, "仅已立项项目可开始执行");
+        }
+        transition(project, ProjectStatus.IN_PROGRESS.getCode(), ProjectAction.START,
+                trim(request.getComment()), request);
+        return queryService.detail(id);
+    }
+
+    @Transactional
+    @Audit(action = "PROJECT_COMPLETE", resourceType = "PROJECT")
+    public ProjectDetailVO complete(Long id, ProjectActionRequest request) {
+        Project project = load(id);
+        accessService.assertCanEdit(project);
+        if (!ProjectStatus.IN_PROGRESS.getCode().equals(project.getStatus())) {
+            throw new BizException(ErrorCode.PROJECT_ILLEGAL_TRANSITION, "仅进行中项目可结项");
+        }
+        transition(project, ProjectStatus.COMPLETED.getCode(), ProjectAction.COMPLETE,
+                trim(request.getComment()), request);
+        return queryService.detail(id);
+    }
+
+    @Transactional
+    @Audit(action = "PROJECT_TERMINATE", resourceType = "PROJECT")
+    public ProjectDetailVO terminate(Long id, ProjectActionRequest request) {
+        assertApprover();
+        Project project = load(id);
+        if (!ProjectStatus.APPROVED.getCode().equals(project.getStatus())
+                && !ProjectStatus.IN_PROGRESS.getCode().equals(project.getStatus())) {
+            throw new BizException(ErrorCode.PROJECT_ILLEGAL_TRANSITION, "仅已立项或进行中项目可终止");
+        }
+        String comment = trim(request.getComment());
+        if (comment == null) {
+            throw new BizException(ErrorCode.BAD_REQUEST, "终止必须填写意见");
+        }
+        transition(project, ProjectStatus.TERMINATED.getCode(), ProjectAction.TERMINATE,
+                comment, request);
         return queryService.detail(id);
     }
 
@@ -89,8 +157,9 @@ public class ProjectWorkflowService {
     public ProjectDetailVO reject(Long id, ProjectActionRequest request) {
         assertApprover();
         Project project = load(id);
-        if (!ProjectStatus.SUBMITTED.getCode().equals(project.getStatus())) {
-            throw new BizException(ErrorCode.PROJECT_ILLEGAL_TRANSITION, "仅已提交项目可驳回");
+        if (!ProjectStatus.SUBMITTED.getCode().equals(project.getStatus())
+                && !ProjectStatus.REVIEWING.getCode().equals(project.getStatus())) {
+            throw new BizException(ErrorCode.PROJECT_ILLEGAL_TRANSITION, "仅已提交或评审中项目可驳回");
         }
         String comment = trim(request.getComment());
         if (comment == null) {

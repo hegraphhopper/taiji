@@ -110,3 +110,13 @@ components/layout/TodoBadge.vue
 - 旧 token 权限缓存：过滤器每次加载用户状态，避免禁用无效。
 - 审批规则变化：PASS 数配置化，默认 1；变更写审计。
 - 前端按钮与后端不一致：以后端 403 为准，前端仅做体验优化。
+
+## 8. 实施口径（C1 实际落地）
+
+- 权限：后端继续 `@PreAuthorize(hasAnyRole...)`，新增 `PermissionCatalog` 统一登记权限点与角色；`GET /roles` 返回角色与权限点；前端 `utils/permission.ts` 共用同一份目录。不新增权限表。
+- 配置：V6 新增 `system_config(key,value,description,updated_by,updated_at)`，种子 `review.requiredPassCount=2`；管理页可改 1–10，非法值拒绝并写审计。
+- PASS 口径：统计项目全部轮次中 `result=PASS` 的不同 `reviewer_id` 数量；同一专家多轮 PASS 只计 1 次；达到配置值才允许 `REVIEWING → APPROVED`。
+- 专家范围：可见所有 `REVIEWING` 项目 + 同组非草稿项目；待办 = `REVIEWING` 且本人本轮未评审。
+- 演示账号：demo profile 增加 expert02、expert03（生产不创建）。
+- 审批门禁变化：APPROVE 从 `SUBMITTED → APPROVED` 调整为 `REVIEWING → APPROVED`；需同步修改 A2 既有测试与前端动作按钮。
+- 系统管理接口统一 `/api/v1/system/*`，审计统一 `SYSTEM_*` 动作码；角色权限点目录同时用于前端菜单与矩阵测试。

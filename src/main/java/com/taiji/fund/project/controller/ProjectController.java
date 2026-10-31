@@ -10,9 +10,12 @@ import com.taiji.fund.project.dto.ProjectApprovalLogVO;
 import com.taiji.fund.project.dto.ProjectDetailVO;
 import com.taiji.fund.project.dto.ProjectListItemVO;
 import com.taiji.fund.project.dto.ProjectQuery;
+import com.taiji.fund.project.dto.ProjectReviewRequest;
+import com.taiji.fund.project.dto.ProjectReviewVO;
 import com.taiji.fund.project.dto.ProjectSaveRequest;
 import com.taiji.fund.project.dto.SectionSaveRequest;
 import com.taiji.fund.project.service.ProjectQueryService;
+import com.taiji.fund.project.service.ProjectReviewService;
 import com.taiji.fund.project.service.ProjectSectionService;
 import com.taiji.fund.project.service.ProjectService;
 import com.taiji.fund.project.service.ProjectWorkflowService;
@@ -40,6 +43,7 @@ public class ProjectController {
     private final ProjectSectionService sectionService;
     private final ProjectQueryService queryService;
     private final ProjectWorkflowService workflowService;
+    private final ProjectReviewService reviewService;
 
     @GetMapping
     public Result<PageResult<ProjectListItemVO>> list(@ModelAttribute ProjectQuery query) {
@@ -94,10 +98,18 @@ public class ProjectController {
                 return Result.ok(workflowService.submit(id, request));
             case WITHDRAW:
                 return Result.ok(workflowService.withdraw(id, request));
+            case ACCEPT:
+                return Result.ok(workflowService.accept(id, request));
             case APPROVE:
                 return Result.ok(workflowService.approve(id, request));
             case REJECT:
                 return Result.ok(workflowService.reject(id, request));
+            case START:
+                return Result.ok(workflowService.start(id, request));
+            case COMPLETE:
+                return Result.ok(workflowService.complete(id, request));
+            case TERMINATE:
+                return Result.ok(workflowService.terminate(id, request));
             default:
                 throw new BizException(ErrorCode.BAD_REQUEST, "不支持的项目操作");
         }
@@ -106,5 +118,17 @@ public class ProjectController {
     @GetMapping("/{id}/logs")
     public Result<List<ProjectApprovalLogVO>> logs(@PathVariable Long id) {
         return Result.ok(workflowService.logs(id));
+    }
+
+    @PostMapping("/{id}/reviews")
+    @PreAuthorize("hasAnyRole('EXPERT','ADMIN')")
+    public Result<ProjectReviewVO> submitReview(@PathVariable Long id,
+                                                @Valid @RequestBody ProjectReviewRequest request) {
+        return Result.ok(reviewService.submit(id, request));
+    }
+
+    @GetMapping("/{id}/reviews")
+    public Result<List<ProjectReviewVO>> reviews(@PathVariable Long id) {
+        return Result.ok(reviewService.list(id));
     }
 }

@@ -20,6 +20,7 @@ import com.taiji.fund.project.dto.ProjectListItemVO;
 import com.taiji.fund.project.dto.ProjectMemberVO;
 import com.taiji.fund.project.dto.ProjectMilestoneVO;
 import com.taiji.fund.project.dto.ProjectQuery;
+import com.taiji.fund.project.dto.ProjectReviewVO;
 import com.taiji.fund.project.mapper.ProjectApprovalLogMapper;
 import com.taiji.fund.project.mapper.ProjectContentMapper;
 import com.taiji.fund.project.mapper.ProjectDocumentMapper;
@@ -28,8 +29,10 @@ import com.taiji.fund.project.mapper.ProjectKeyTechMapper;
 import com.taiji.fund.project.mapper.ProjectMapper;
 import com.taiji.fund.project.mapper.ProjectMemberMapper;
 import com.taiji.fund.project.mapper.ProjectMilestoneMapper;
+import com.taiji.fund.project.mapper.ProjectReviewMapper;
 import com.taiji.fund.security.LoginUser;
 import com.taiji.fund.security.SecurityUtils;
+import com.taiji.fund.system.config.ReviewConfigService;
 import com.taiji.fund.system.group.Group;
 import com.taiji.fund.system.group.GroupMapper;
 import com.taiji.fund.system.techdirection.TechDirection;
@@ -63,6 +66,9 @@ public class ProjectQueryService {
     private final ProjectMemberMapper memberMapper;
     private final ProjectApprovalLogMapper approvalLogMapper;
     private final ProjectDocumentMapper documentMapper;
+    private final ProjectReviewMapper reviewMapper;
+    private final ProjectReviewService reviewService;
+    private final ReviewConfigService reviewConfigService;
     private final GroupMapper groupMapper;
     private final UserMapper userMapper;
     private final TechDirectionMapper techDirectionMapper;
@@ -184,6 +190,28 @@ public class ProjectQueryService {
                 .stream()
                 .map(ProjectApprovalLogVO::from)
                 .collect(Collectors.toList()));
+        vo.setReviewRound(project.getReviewRound());
+        vo.setReviewPassCount(reviewService.passCount(id));
+        vo.setRequiredPassCount(reviewConfigService.requiredPassCount());
+        List<com.taiji.fund.project.domain.ProjectReview> reviews = reviewMapper.selectList(Wrappers
+                .<com.taiji.fund.project.domain.ProjectReview>lambdaQuery()
+                .eq(com.taiji.fund.project.domain.ProjectReview::getProjectId, id)
+                .orderByDesc(com.taiji.fund.project.domain.ProjectReview::getRound)
+                .orderByAsc(com.taiji.fund.project.domain.ProjectReview::getId));
+        Map<Long, String> reviewerNames = reviews.isEmpty() ? Collections.emptyMap()
+                : userMapper.selectList(Wrappers.<User>lambdaQuery()
+                        .in(User::getId, reviews.stream()
+                                .map(com.taiji.fund.project.domain.ProjectReview::getReviewerId)
+                                .filter(reviewerId -> reviewerId != null)
+                                .distinct().collect(Collectors.toList())))
+                .stream().collect(Collectors.toMap(User::getId,
+                        user -> user.getRealName() == null ? user.getUsername() : user.getRealName(),
+                        (left, right) -> left));
+        vo.setReviews(reviews.stream().map(review -> {
+            ProjectReviewVO reviewVO = ProjectReviewVO.from(review);
+            reviewVO.setReviewerName(reviewerNames.get(review.getReviewerId()));
+            return reviewVO;
+        }).collect(Collectors.toList()));
         vo.setDocuments(documentMapper.selectList(Wrappers
                 .<com.taiji.fund.project.domain.ProjectDocument>lambdaQuery()
                 .eq(com.taiji.fund.project.domain.ProjectDocument::getProjectId, id)
@@ -217,9 +245,13 @@ public class ProjectQueryService {
             return;
         }
         if (user.getRoles().contains(RoleCode.EXPERT.name())) {
-            // governance 指派评审前，专家按本组且非草稿受限处理
-            applyGroupScope(wrapper, user);
-            wrapper.ne(Project::getStatus, ProjectStatus.DRAFT.getCode());
+            wrapper.and(condition -> {
+                condition.eq(Project::getStatus, ProjectStatus.REVIEWING.getCode());
+                if (user.getGroupId() != null) {
+                    condition.or(inner -> inner.eq(Project::getGroupId, user.getGroupId())
+                            .ne(Project::getStatus, ProjectStatus.DRAFT.getCode()));
+                }
+            });
             return;
         }
         wrapper.eq(Project::getId, -1L);

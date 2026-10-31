@@ -74,14 +74,14 @@ class ReadOnlyApiTest extends AbstractApiTest {
         int postStatus = mockMvc.perform(post("/api/v1/groups")
                         .header("Authorization", bearer(token))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"新增项目组\"}"))
+                        .content("{\"name\":\"新增项目组\",\"code\":\"GRP-READONLY-DENY\"}"))
                 .andReturn().getResponse().getStatus();
         assertThat(postStatus).isIn(403, 405);
 
         int putStatus = mockMvc.perform(put("/api/v1/tech-directions")
                         .header("Authorization", bearer(token))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"新增技术方向\"}"))
+                        .content("{\"name\":\"新增技术方向\",\"code\":\"TD-READONLY-DENY\"}"))
                 .andReturn().getResponse().getStatus();
         assertThat(putStatus).isIn(403, 405);
     }
