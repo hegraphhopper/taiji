@@ -2,7 +2,7 @@
   <div class="page detail-page" v-loading="loading">
     <div class="page-heading">
       <div class="title-block">
-        <el-button text :icon="ArrowLeft" @click="router.push('/projects')">返回列表</el-button>
+        <el-button text class="back-link" @click="router.push('/projects')">返回列表</el-button>
         <div class="title-row">
           <h1>{{ project?.name || '项目详情' }}</h1>
           <el-tag v-if="project" :type="statusTagType(project.status)" effect="light">
@@ -346,7 +346,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ArrowLeft, Edit, Refresh, Upload } from '@element-plus/icons-vue'
+import { Edit, Refresh, Upload } from '@element-plus/icons-vue'
 import {
   deleteDocument,
   downloadDocument,
@@ -692,7 +692,12 @@ function formatSize(size: number): string {
 .title-block {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 4px;
+}
+
+.back-link {
+  padding-left: 0;
 }
 
 .title-row {
