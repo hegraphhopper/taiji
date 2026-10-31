@@ -1,36 +1,51 @@
-# 后端质量规范
+# 后端质量规范（A1 实测）
 
-- 在信任边界校验外部输入，保留服务端权限、路径、安全和数据完整性校验。
-- 契约变化明确记录接口、字段、校验和错误行为，并按项目方式生成相关类型。
-- 覆盖正常、边界、拒绝、失败和重复调用路径；有副作用的操作检查原子性及恢复行为。
-- 运行项目已有相关测试和编译检查，不以进程启动代替真实链路验证。
-- 检查 diff，保留无关改动，避免提交密钥、临时文件或构建产物。
-- 首次调研补充真实验证命令与典型接口断言；规范更新内容使用中文。
+## 技术栈事实
 
-## 技术栈事实（2026-10-29 实测）
-
-- JDK：`java version "1.8.0_65"`；`JAVA_HOME=D:\JDK`，Maven 报告的 `Java home` 为 `D:\JDK\jre`。源码与字节码目标均为 1.8，禁用 Java 9+ 语法（`var`、`record`、switch 表达式等）。
-- 构建：Apache Maven 3.5.0（`D:\JavaConfig\maven`）。插件版本需与 3.5.0 兼容，当前使用 `maven-compiler-plugin` 3.8.1。
-- Maven 输出为 GBK，PowerShell 控制台可能乱码；判定构建结果以退出码与 `-q` 输出为准，不以乱码文本为依据。
-- 本机 `python.exe` / `py` 不在 PATH（`WindowsApps` 下为 Store 占位符，退出码 9009）。调用 Trellis 脚本使用 `D:\SoftWare\Anaconda3\python.exe`。
+- JDK：`1.8.0_65`；源码与字节码目标 1.8，禁用 Java 9+ 语法。
+- Maven：3.5.0；`maven-compiler-plugin` 3.8.1。
+- Spring Boot 2.7.18、MyBatis-Plus 3.5.3.2、H2 2.1.214、Flyway 8.5.13、JJWT 0.11.5、springdoc 1.6.15。
+- Maven 输出为 GBK；判定结果以退出码与 `-q` 输出为准。
 
 ## 验证命令
 
 ```powershell
-mvn -q clean package        # 期望退出码 0，产出 target/<artifactId>-<version>.jar
-java -cp target/classes com.example.helloworld.HelloWorld
+mvn -q test                    # 单元测试，必须 22/22 通过
+mvn -q -DskipTests package     # 构建 jar
+mvn -q clean package           # 全量构建；执行前必须停止后端，避免 Windows 锁定 jar
+
+cd frontend
+npm.cmd run typecheck
+npm.cmd run build
 ```
 
-- 当 PRD 明确禁止测试依赖时，单元用例以命令行方式执行（构建退出码、产物存在性、标准输出精确匹配、`git check-ignore -v target/`），并在报告中标注 `not_applicable` 说明无法产出框架化测试，`not_applicable` 不等于通过。
+- 不要在后端 jar 正在运行时执行 `mvn clean/package`：Windows 会锁定 `target/fund-platform-1.0.0.jar`，导致删除/覆盖失败。
+- 运行态验证使用 `scripts/start-demo.ps1`、`scripts/status-demo.ps1`、`scripts/stop-demo.ps1`；禁止在前台工具调用中直接启动服务（会持有输出管道导致调用不返回）。
+- 健康检查：`http://localhost:8080/api/v1/health`；前端：`http://127.0.0.1:5173`。
 
-## 常见错误
+## 测试规范
 
-### Common Mistake: 源码目录残留 `*.class` 或 IDE 临时 `.java` 导致构建失败
+- 框架：JUnit 5 + Spring Boot Test + MockMvc；测试库使用 `src/test/resources/application-test.yml`（H2 内存、随机库名）。
+- 测试类 `@ActiveProfiles({"demo","test"})`，由 `DemoAccountInitializer` 初始化演示账号。
+- 测试数据使用唯一用户名，避免共享上下文污染；锁定/改密测试使用专用账号。
+- 禁止 `skip`/`only`/删除断言；失败如实记录。
+- 测试报告写入 `.trellis/tasks/<task>/test/unit/report-round-N.md`。
+- 第一轮不达标进入 `trellis-test-rework`；每轮 ≤ `max_fix_rounds`。
 
-**Symptom**：`mvn -q clean package` 退出码 1，报 `重复: com.example.<pkg>.<Class>` 或「类 X 是公共的, 应在名为 X.java 的文件中声明」，`target/*.jar` 不产出。
+## 代码检查
 
-**Cause**：手工 `javac` 把 `.class` 写回 `src/main/java`，或 IDE Code Runner 生成 `tempCodeRunnerFile.java`（内容与被测类相同、重复定义同一个 `public class`）。`.gitignore` 只忽略 `target/`，这些残留会以未跟踪文件形式存在，且被 Maven 一并编译。
+- Controller 不返回实体；Service 事务边界清晰。
+- 外部输入 `@Valid`；SQL 参数绑定；排序字段白名单。
+- 错误码与 HTTP 状态匹配；不泄露堆栈。
+- 新增写接口必须 `@Audit`。
+- 不提交密钥、Token、真实数据、构建产物。
 
-**Fix**：删除 `src/main/java` 下的 `.class` 与 `tempCodeRunnerFile*.java`，重新构建。
+## Common Mistake: 常驻进程阻塞工具调用
 
-**Prevention**：编译产物只允许出现在 `target/`；提交前执行 `git status --porcelain --untracked-files=all -- src` 确认源码目录只含预期源文件。若确需扩展忽略规则，需先与用户确认（当前 `.gitignore` 仅覆盖 `target/` 与 IDE 工程文件）。
+**Symptom**：启动服务后工具调用长时间不返回，健康检查已成功但会话卡住。
+
+**Cause**：`Start-Process -NoNewWindow` 或前台命令启动的 Java/Node 子进程继承标准输出管道，工具等待管道关闭。
+
+**Fix**：停止子进程；改用 `Start-Process -WindowStyle Hidden` + 文件重定向，或使用 `scripts/start-demo.ps1`。
+
+**Prevention**：启动、轮询、停止拆成独立调用；不要在子代理提示中要求“前台启动服务并等待”。

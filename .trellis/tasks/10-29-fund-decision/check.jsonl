@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "决策规则与报告内容验收"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "预检页与下载验收"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "复用分析结果避免二次计算"}
+{"file": ".trellis/tasks/10-29-fund-dup-platform/research/architecture-decisions.md", "reason": "建议阈值与报告格式核对"}

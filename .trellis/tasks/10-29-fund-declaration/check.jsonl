@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "状态机、越权与事务验收"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "项目子表一致性检查"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "前端表单与后端 DTO 映射核对"}
+{"file": ".trellis/tasks/10-29-fund-dup-platform/research/architecture-decisions.md", "reason": "附件解析降级与编码验证"}

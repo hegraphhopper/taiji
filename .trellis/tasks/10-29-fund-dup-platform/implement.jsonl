@@ -1,0 +1,8 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "后端规范索引与开发前检查"}
+{"file": ".trellis/spec/backend/directory-structure.md", "reason": "Java 分层与包组织约定"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "数据库迁移、事务与完整性要求"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "后端质量与验证命令"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "前端规范索引与开发前检查"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "页面与组件设计约定"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "跨层数据流与契约一致性"}
+{"file": ".trellis/tasks/10-29-fund-dup-platform/research/architecture-decisions.md", "reason": "版本兼容、环境事实与算法选型依据"}

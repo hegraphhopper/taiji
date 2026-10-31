@@ -1,0 +1,8 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "后端规范索引"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "聚合口径与查询性能"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "按月去重与索引使用"}
+{"file": ".trellis/spec/frontend/index.md", "reason": "前端规范索引"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "图表与筛选组件规范"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "筛选条件与 URL 状态同步"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "趋势接口类型与空值处理"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "归因计数跨层一致性"}

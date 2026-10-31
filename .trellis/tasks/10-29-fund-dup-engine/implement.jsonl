@@ -1,0 +1,7 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "后端规范索引"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "算法可测试性与性能门禁"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "外部 LLM 降级与错误传播"}
+{"file": ".trellis/spec/backend/logging-guidelines.md", "reason": "LLM 调用日志与密钥脱敏"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "运行、项目对与快照事务一致性"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "复用分词/聚合工具避免重复实现"}
+{"file": ".trellis/tasks/10-29-fund-dup-platform/research/architecture-decisions.md", "reason": "算法选型、阈值与版本兼容依据"}

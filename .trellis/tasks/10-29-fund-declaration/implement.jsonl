@@ -1,0 +1,8 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "后端规范索引"}
+{"file": ".trellis/spec/backend/directory-structure.md", "reason": "feature 分包与边界"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "多表事务与逻辑删除"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "状态机非法流转错误处理"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "表单、附件与详情页规范"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "项目编辑态与异步隔离"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "结构化申报内容跨层契约"}
+{"file": ".trellis/tasks/10-29-fund-dup-platform/research/architecture-decisions.md", "reason": "POI/PDFBox 解析与版本约束"}

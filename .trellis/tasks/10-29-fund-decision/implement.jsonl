@@ -1,0 +1,7 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "后端规范索引"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "规则、报告与降级测试"}
+{"file": ".trellis/spec/backend/error-handling.md", "reason": "预检失败与 LLM 异常处理"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "预检结果与报告下载交互"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "建议枚举与空值处理"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "页面结论与导出报告一致"}
+{"file": ".trellis/tasks/10-29-fund-dup-platform/research/architecture-decisions.md", "reason": "POI 报告与 LLM 降级约束"}

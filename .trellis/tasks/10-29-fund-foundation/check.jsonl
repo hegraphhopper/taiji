@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "接口、事务与安全校验"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "Flyway 与种子数据检查"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "登录页与路由守卫验收"}
+{"file": ".trellis/tasks/10-29-fund-dup-platform/research/architecture-decisions.md", "reason": "依赖版本兼容性核对"}

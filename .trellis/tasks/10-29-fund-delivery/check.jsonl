@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "最终质量门禁"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "页面验收与截图核对"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "交付物与运行行为一致性"}
+{"file": ".trellis/tasks/10-29-fund-dup-platform/research/architecture-decisions.md", "reason": "部署路径与备份恢复核对"}

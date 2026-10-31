@@ -1,0 +1,40 @@
+{
+  "id": "fund-dup-platform",
+  "name": "fund-dup-platform",
+  "title": "自投研发项目重复投入治理平台",
+  "description": "面向电科太极平台基金/创新基金的项目管理与重复投入分析平台：申报书结构化、重复度分析、趋势归因、投入态势与辅助决策",
+  "status": "planning",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P0",
+  "creator": "wangkuo@core.ez",
+  "assignee": "wangkuo@core.ez",
+  "createdAt": "2026-10-29",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "wecode/member-shangcirenwuzhix-779d",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "10-29-fund-foundation",
+    "10-29-fund-declaration",
+    "10-29-fund-dup-engine",
+    "10-29-fund-trend-attribution",
+    "10-29-fund-investment",
+    "10-29-fund-decision",
+    "10-29-fund-governance",
+    "10-29-fund-delivery"
+  ],
+  "parent": null,
+  "relatedFiles": [
+    "docs/",
+    "src/",
+    "frontend/",
+    "docs/A阶段产品设计书.md"
+  ],
+  "notes": "总任务：持有赛题原始需求、跨子任务验收标准与最终集成评审；实现工作由子任务承担",
+  "meta": {}
+}

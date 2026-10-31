@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "夹具、权重、归因与降级测试"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "快照与明细一致性校验"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "分析结果到报告/趋势的契约核对"}
+{"file": ".trellis/tasks/10-29-fund-dup-platform/research/architecture-decisions.md", "reason": "算法口径与默认阈值核对"}

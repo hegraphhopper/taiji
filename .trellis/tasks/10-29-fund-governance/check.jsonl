@@ -1,0 +1,5 @@
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "权限矩阵与审批测试门禁"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "删除引用与事务校验"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "四角色页面走查"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "复用数据范围与审计工具"}
+{"file": ".trellis/tasks/10-29-fund-dup-platform/research/architecture-decisions.md", "reason": "角色定义与验收口径"}
