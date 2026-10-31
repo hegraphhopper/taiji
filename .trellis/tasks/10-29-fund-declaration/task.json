@@ -3,7 +3,7 @@
   "name": "fund-declaration",
   "title": "项目与申报书管理",
   "description": "项目立项与申报书结构化信息、附件上传解析、节点计划、基础状态流转；专家评审与完整审批流后置到 governance",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,

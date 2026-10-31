@@ -21,6 +21,7 @@ frontend/
       http.ts                    Axios 实例、Bearer、401/403、统一错误
       auth.ts                    login/logout/me/changePassword
       system.ts                 dicts/groups/tech-directions
+      project.ts                项目 CRUD、状态动作、附件上传/解析/下载
     stores/
       auth.ts                    token/user/roles/permissions、登录/登出/改密
       dict.ts                    字典缓存、在途请求去重
@@ -29,12 +30,16 @@ frontend/
     views/
       login/LoginView.vue
       dashboard/DashboardView.vue
+      project/ProjectListView.vue
+      project/ProjectFormView.vue
+      project/ProjectDetailView.vue
       error/ForbiddenView.vue
       error/NotFoundView.vue
     styles/tokens.css            设计 token
     styles/index.css             全局样式
     types/index.ts               ApiResult/UserInfo/Dicts 等
     utils/redirect.ts            站内跳转校验
+    utils/project.ts             状态标签、金额与日期格式化
 ```
 
 ## 归属约定

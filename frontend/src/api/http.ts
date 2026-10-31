@@ -49,6 +49,9 @@ http.interceptors.request.use((config) => {
 
 http.interceptors.response.use(
   (response: AxiosResponse<ApiResult<unknown>>) => {
+    if (response.config.responseType === 'blob') {
+      return response
+    }
     const body = response.data
     if (body && typeof body.code === 'number' && body.code !== 0) {
       return Promise.reject(new Error(body.message || '请求失败'))

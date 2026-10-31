@@ -22,7 +22,7 @@
           <el-icon><Odometer /></el-icon>
           <template #title>工作台</template>
         </el-menu-item>
-        <el-menu-item index="/projects" disabled>
+        <el-menu-item index="/projects">
           <el-icon><Folder /></el-icon>
           <template #title>项目管理 <span class="phase-tag">A2</span></template>
         </el-menu-item>

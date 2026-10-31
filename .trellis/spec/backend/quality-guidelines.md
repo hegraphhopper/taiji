@@ -10,18 +10,19 @@
 ## 验证命令
 
 ```powershell
-mvn -q test                    # 单元测试，必须 22/22 通过
+mvn -q test                    # 单元测试，A2 完成后必须 46/46 通过
 mvn -q -DskipTests package     # 构建 jar
-mvn -q clean package           # 全量构建；执行前必须停止后端，避免 Windows 锁定 jar
+mvn -q clean package           # 全量构建；执行前必须先运行 scripts/stop-demo.ps1
 
 cd frontend
 npm.cmd run typecheck
 npm.cmd run build
 ```
 
-- 不要在后端 jar 正在运行时执行 `mvn clean/package`：Windows 会锁定 `target/fund-platform-1.0.0.jar`，导致删除/覆盖失败。
+- 不要在后端或前端开发服务运行时执行 `mvn clean/package`：Windows 会锁定 `target/fund-platform-1.0.0.jar` 与 `target/vite.*.log`，导致 clean 失败（实测报错 `Failed to delete target\vite.out.log`）。先执行 `scripts/stop-demo.ps1`。
 - 运行态验证使用 `scripts/start-demo.ps1`、`scripts/status-demo.ps1`、`scripts/stop-demo.ps1`；禁止在前台工具调用中直接启动服务（会持有输出管道导致调用不返回）。
 - 健康检查：`http://localhost:8080/api/v1/health`；前端：`http://127.0.0.1:5173`。
+- 冷启动基线：删除 `data/` 后 `scripts/start-demo.ps1 -SkipBuild`，`status-demo.ps1` 显示 backend/frontend 双 UP；`user01/User@12345` 登录成功后 `GET /api/v1/projects` 返回 `code=0`（空库 `total=0`）。这是 A2 收尾与后续阶段的冒烟口径。
 
 ## 测试规范
 

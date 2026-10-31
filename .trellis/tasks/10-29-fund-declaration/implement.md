@@ -2,19 +2,19 @@
 
 ## 1. 顺序清单
 
-- [ ] Flyway `V3__project_schema.sql`，H2 启动验证；同步准备 MySQL 兼容检查。
-- [ ] 实体、Mapper、枚举（FundType/ProjectStatus/MemberRole/ReviewResult/ParseStatus）。
-- [ ] `ProjectQueryService`：数据范围、筛选、分页、详情聚合。
-- [ ] `ProjectService`：创建/更新/删除、编码生成、子表批量保存事务。
-- [ ] `ProjectStateMachine` + `ProjectWorkflowService`：首版 submit/withdraw/approve/reject，轨迹与审计；完整评审流转留到 governance。
-- [ ] `ProjectDocumentService`：存储、上传校验、解析、预览、下载、删除。
-- [ ] `TextExtractor`（docx/pdf/txt/md）、`SectionParser`、清洗工具。
-- [ ] 首版不实现专家评审 Service；`project_review` 表可随 V3 建好，接口后置。
-- [ ] Controller + DTO + 参数校验 + OpenAPI 注解。
-- [ ] 后端测试：基础状态流转、越权、解析夹具、事务、集成流程。
-- [ ] 前端：项目列表、创建/编辑分区表单、详情 Tab、附件上传与解析预览、评审弹窗。
-- [ ] 前端：状态/角色按钮控制、离开提醒、空态/错误态。
-- [ ] 端到端演示脚本：创建 → 上传 → 回填 → 提交 → 审查 → 评审 → 立项。
+- [x] Flyway `V3__project_schema.sql`，H2 启动验证；同步准备 MySQL 兼容检查。
+- [x] 实体、Mapper、枚举（FundType/ProjectStatus/MemberRole/ReviewResult/ParseStatus）。
+- [x] `ProjectQueryService`：数据范围、筛选、分页、详情聚合。
+- [x] `ProjectService`：创建/更新/删除、编码生成、子表批量保存事务。
+- [x] `ProjectStateMachine` + `ProjectWorkflowService`：首版 submit/withdraw/approve/reject，轨迹与审计；完整评审流转留到 governance。
+- [x] `ProjectDocumentService`：存储、上传校验、解析、预览、下载、删除。
+- [x] `TextExtractor`（docx/pdf/txt/md）、`SectionParser`、清洗工具。
+- [x] 首版不实现专家评审 Service；`project_review` 表可随 V3 建好，接口后置。
+- [x] Controller + DTO + 参数校验 + OpenAPI 注解。
+- [x] 后端测试：基础状态流转、越权、解析夹具、事务、集成流程。
+- [x] 前端：项目列表、创建/编辑分区表单、详情 Tab、附件上传与解析预览、评审弹窗。
+- [x] 前端：状态/角色按钮控制、离开提醒、空态/错误态。
+- [x] 端到端演示脚本：创建 → 上传 → 回填 → 提交 → 审查 → 评审 → 立项。
 
 ## 2. 验证命令
 

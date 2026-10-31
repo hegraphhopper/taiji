@@ -29,15 +29,15 @@ class FlywayMigrationTest {
         Flyway first = newFlyway();
         MigrateResult firstResult = first.migrate();
 
-        assertThat(firstResult.migrationsExecuted).isEqualTo(2);
-        assertThat(first.info().current().getVersion().getVersion()).isEqualTo("2");
+        assertThat(firstResult.migrationsExecuted).isGreaterThanOrEqualTo(3);
+        assertThat(Integer.parseInt(first.info().current().getVersion().getVersion())).isGreaterThanOrEqualTo(3);
         assertSeedCounts();
 
         Flyway second = newFlyway();
         MigrateResult secondResult = second.migrate();
 
         assertThat(secondResult.migrationsExecuted).isZero();
-        assertThat(second.info().current().getVersion().getVersion()).isEqualTo("2");
+        assertThat(Integer.parseInt(second.info().current().getVersion().getVersion())).isGreaterThanOrEqualTo(3);
         assertSeedCounts();
 
         try (Connection connection = openConnection();

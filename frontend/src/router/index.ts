@@ -28,6 +28,30 @@ const routes: RouteRecordRaw[] = [
         name: 'dashboard',
         component: () => import('@/views/dashboard/DashboardView.vue'),
         meta: { title: '工作台' }
+      },
+      {
+        path: 'projects',
+        name: 'projects',
+        component: () => import('@/views/project/ProjectListView.vue'),
+        meta: { title: '项目管理' }
+      },
+      {
+        path: 'projects/new',
+        name: 'project-create',
+        component: () => import('@/views/project/ProjectFormView.vue'),
+        meta: { title: '新建项目' }
+      },
+      {
+        path: 'projects/:id',
+        name: 'project-detail',
+        component: () => import('@/views/project/ProjectDetailView.vue'),
+        meta: { title: '项目详情' }
+      },
+      {
+        path: 'projects/:id/edit',
+        name: 'project-edit',
+        component: () => import('@/views/project/ProjectFormView.vue'),
+        meta: { title: '编辑项目' }
       }
     ]
   },

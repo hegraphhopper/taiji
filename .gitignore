@@ -10,6 +10,8 @@ frontend/dist/
 frontend/.vite/
 frontend/*.local
 
+node_modules/
+
 data/
 storage/
 logs/

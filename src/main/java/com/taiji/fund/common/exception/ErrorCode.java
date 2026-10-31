@@ -24,6 +24,15 @@ public enum ErrorCode {
 
     UNSUPPORTED_MEDIA_TYPE(41500, "不支持的请求内容类型", 415),
 
+    PROJECT_ILLEGAL_TRANSITION(40010, "项目状态不允许该操作", 400),
+    PROJECT_CODE_DUPLICATED(40020, "项目编码已存在", 400),
+    PROJECT_NOT_EDITABLE(40021, "当前项目状态不允许修改", 400),
+    PROJECT_NOT_FOUND(40410, "项目不存在", 404),
+    FILE_TYPE_NOT_ALLOWED(40030, "不支持的文件类型", 400),
+    FILE_TOO_LARGE(40031, "文件超过 20MB 限制", 400),
+    FILE_LIMIT_EXCEEDED(40032, "单个项目最多 10 个附件", 400),
+    FILE_NOT_FOUND(40420, "附件不存在", 404),
+
     INTERNAL_ERROR(50000, "服务器内部错误", 500);
 
     private final int code;

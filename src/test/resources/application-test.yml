@@ -21,6 +21,8 @@ app:
   jwt:
     secret: test-only-fund-platform-jwt-secret-0123456789abcdef
     expire-hours: 8
+  upload:
+    dir: ./target/test-storage
 
 logging:
   level:

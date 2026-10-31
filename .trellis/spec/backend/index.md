@@ -8,6 +8,7 @@
 |------|------|
 | [目录结构](./directory-structure.md) | 包结构、分层边界与测试位置 |
 | [认证与安全](./security-guidelines.md) | JWT、锁定、数据范围、审计契约 |
+| [项目与申报书](./project-guidelines.md) | 项目 CRUD、状态流转、附件解析契约 |
 | [数据库规范](./database-guidelines.md) | Flyway、H2/MySQL 兼容、事务与测试库 |
 | [错误处理](./error-handling.md) | 统一响应、错误码、框架异常映射 |
 | [日志规范](./logging-guidelines.md) | 审计、脱敏与日志位置 |

@@ -2,7 +2,7 @@
 
 面向电科太极平台基金、创新基金等自投研发项目的项目管理与重复投入治理平台。A 阶段聚焦核心主线：**结构化申报书 → 多维重复度分析 → 重复度趋势与归因**。
 
-当前版本为 A1 基础版：完成工程底座、最小登录鉴权、组织/技术方向种子、审计写入、前端应用壳。项目管理、分析引擎、趋势归因分别在 A2–A4 实现；角色管理与 OA 审批流在 C 阶段收尾。
+当前版本为 A2 申报管理版：在 A1 工程底座之上，完成项目主数据、结构化申报内容（目标/研制内容/关键技术/节点/成员）、附件上传与章节解析回填、基础状态流转与审批轨迹。分析引擎、趋势归因在 A3–A4 实现；角色管理与 OA 审批流在 C 阶段收尾。
 
 ## 技术栈
 
@@ -122,11 +122,13 @@ npm run build
 │  ├─ config/                        Security、MyBatis-Plus、Jackson、OpenAPI、CORS
 │  ├─ security/                      JWT、过滤器、登录服务、数据范围钩子
 │  ├─ system/                        用户/角色/项目组/技术方向/字典/审计
+│  ├─ project/                       项目主数据、结构化内容、状态机、查询
+│  ├─ document/                      附件上传、文本提取、章节解析
 │  ├─ health/                        健康检查
 │  └─ bootstrap/                     演示账号初始化
 ├─ src/main/resources/
 │  ├─ application*.yml               配置
-│  └─ db/migration/                  Flyway V1 建表、V2 种子
+│  └─ db/migration/                  Flyway V1 建表、V2 种子、V3 项目表
 ├─ frontend/                         Vue 3 + TypeScript 前端
 ├─ scripts/                          start/stop/status 脚本
 ├─ docs/                             产品设计与交付文档
@@ -146,9 +148,18 @@ npm run build
 - 演示账号初始化、健康检查、Swagger
 - 启动 / 停止 / 状态脚本
 
-## A1 暂未包含
+## A2 已实现能力
 
-- 项目与申报书管理（A2）
+- 项目主数据：自动编码 `TJJH-{年}-{4 位}`、基金类型、项目组、负责人、技术方向、预算、起止时间
+- 结构化申报内容：项目目标、研制内容、关键技术（难度）、节点计划（权重）、项目成员（角色/人月）
+- 附件：docx/pdf/txt/md 上传（≤20MB、每项目 ≤10 个）、解析正文、章节预览与一键回填、失败原因可见
+- 状态机：`DRAFT → SUBMITTED → APPROVED / REJECTED`，提交完整性校验、撤回、驳回意见必填、非法流转拒绝
+- 审批轨迹与审计：项目增删改、内容保存、状态动作、附件上传/解析/删除全部留痕
+- 数据范围：ADMIN/PMO 全量、GROUP_USER 本组、EXPERT 已提交项目只读；后端强制过滤
+- 前端：项目列表（筛选/分页/排序）、分区新建编辑表单、详情六 Tab、解析预览与回填
+
+## 尚未包含
+
 - 重复度分析与趋势归因（A3/A4）
 - 用户/角色/项目组/技术方向管理界面（C）
 - 形式审查、专家评审、完整审批流（C）
@@ -157,7 +168,8 @@ npm run build
 ## 相关文档
 
 - `docs/A阶段产品设计书.md`：A 阶段产品、交互、数据、接口、算法与验收基线
-- `.trellis/tasks/10-29-fund-foundation/prd.md`：A1 需求与验收标准
+- `.trellis/tasks/archive/2026-10/10-29-fund-foundation/prd.md`：A1 需求与验收标准
+- `.trellis/tasks/archive/2026-10/10-29-fund-declaration/`：A2 需求、设计、执行计划与验收报告
 - `.trellis/tasks/10-29-fund-dup-platform/`：整体规划、设计、子任务拆分
 
 ## 常见问题
