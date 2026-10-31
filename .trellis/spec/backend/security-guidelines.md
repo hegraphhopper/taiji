@@ -73,8 +73,21 @@ AuditAspect.around(ProceedingJoinPoint, Audit): Object
 
 - `ADMIN`、`PMO`：全量。
 - `GROUP_USER`：仅 `currentGroupId`。
-- `EXPERT`：A1 未启用评审指派，按受限处理；governance 接入评审指派后再明确放行规则。
+- `EXPERT`：全部 `REVIEWING` 项目 + 本组非草稿项目，只读；可提交评审，不可改项目或看趋势/投入/系统管理。
 - 任何按 ID 读取/修改业务数据后必须再次校验归属，不能只依赖列表过滤。
+
+### 项目动作权限（C1）
+
+| 动作 | 允许角色 |
+|------|----------|
+| 创建/编辑项目 | ADMIN；GROUP_USER（同组） |
+| SUBMIT / WITHDRAW | ADMIN；GROUP_USER（同组，WITHDRAW 仅提交人） |
+| ACCEPT / APPROVE / REJECT / TERMINATE | ADMIN、PMO |
+| START / COMPLETE | ADMIN；GROUP_USER（同组） |
+| 提交评审 | ADMIN、EXPERT（仅 `REVIEWING`，每轮一次） |
+
+- PMO 不继承项目维护类动作；不要用 `isUnrestricted()`（数据范围）代替动作权限。
+- 立项 PASS 门禁：项目全部轮次中 `result=PASS` 的不同专家数，同一专家多轮 PASS 只计 1 人；阈值取 `review.requiredPassCount`（1–10，默认 2）。
 
 ### 审计
 
