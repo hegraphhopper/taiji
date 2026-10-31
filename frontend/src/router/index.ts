@@ -54,6 +54,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '编辑项目' }
       },
       {
+        path: 'trend',
+        name: 'trend',
+        component: () => import('@/views/trend/TrendView.vue'),
+        meta: { title: '趋势与归因', roles: ['PMO', 'ADMIN', 'GROUP_USER'] }
+      },
+      {
         path: 'analysis/runs',
         name: 'analysis-runs',
         component: () => import('@/views/analysis/AnalysisRunsView.vue'),

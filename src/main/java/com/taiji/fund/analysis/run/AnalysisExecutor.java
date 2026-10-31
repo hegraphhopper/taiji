@@ -188,7 +188,8 @@ public class AnalysisExecutor {
                 .projectCount(inputs.size())
                 .pairCount(pairs.size())
                 .llmUsed(llmUsed)
-                .writeProjectScores(true)
+                // 历史回填（analysisDate 非空）只沉淀快照，不回写项目当前分数，避免旧月份覆盖最新结论
+                .writeProjectScores(analysisDate == null)
                 .pairs(pairs)
                 .snapshots(snapshots)
                 .projectScores(updates)

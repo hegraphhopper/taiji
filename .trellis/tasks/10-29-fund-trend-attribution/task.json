@@ -3,7 +3,7 @@
   "name": "fund-trend-attribution",
   "title": "重复度趋势与归因看板",
   "description": "重复度随时间的趋势、来源归因（本组内部/他组在先/我方在先/同期）、下钻与热力图",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,

@@ -398,3 +398,110 @@ export interface AnalysisPrecheckResult {
 }
 
 
+
+export type TrendGranularity = 'MONTH' | 'QUARTER' | 'YEAR'
+
+export interface TrendQueryParams {
+  startMonth?: string
+  endMonth?: string
+  granularity?: TrendGranularity
+  groupId?: number | null
+  techDirectionId?: number | null
+  fundType?: string | null
+}
+
+export interface TrendAttributionCounts {
+  selfGroup: number
+  peerEarlier: number
+  ourEarlier: number
+  simultaneous: number
+}
+
+export interface TrendAttributionRatios {
+  selfGroup: number
+  peerEarlier: number
+  ourEarlier: number
+  simultaneous: number
+}
+
+export interface TrendMom {
+  avgMaxScoreDelta: number
+  avgMaxScoreRatio: number | null
+}
+
+export interface TrendPoint {
+  period: string
+  analyzedProjectCount: number
+  avgMaxScore: number
+  avgTopScore: number
+  highRiskCount: number
+  pairCount: number
+  uniquePairCount: number
+  highPairCount: number
+  attribution: TrendAttributionCounts
+  ratios: TrendAttributionRatios
+  mom: TrendMom | null
+}
+
+export interface TrendResponse {
+  hasData: boolean
+  granularity: string
+  startMonth: string
+  endMonth: string
+  points: TrendPoint[]
+  summary: string[]
+  thresholds: Record<string, number>
+  note: string
+}
+
+export interface GroupAttribution {
+  groupId: number | null
+  groupName: string
+  counts: TrendAttributionCounts
+  total: number
+}
+
+export interface TrendAttributionResponse {
+  hasData: boolean
+  total: number
+  counts: TrendAttributionCounts
+  ratios: TrendAttributionRatios
+  groups: GroupAttribution[]
+  note: string
+}
+
+export interface HeatmapRow {
+  key: string
+  label: string
+}
+
+export interface HeatmapCell {
+  rowKey: string
+  column: string
+  value: number | null
+  sampleCount: number
+}
+
+export interface HeatmapResponse {
+  hasData: boolean
+  dimension: string
+  metric: string
+  columns: string[]
+  rows: HeatmapRow[]
+  cells: HeatmapCell[]
+  note: string
+}
+
+export interface DrillProject {
+  projectId: number
+  code: string | null
+  name: string | null
+  groupId: number | null
+  groupName: string | null
+  techDirectionName: string | null
+  fundType: string | null
+  maxScore: number
+  riskLevel: string
+  attributionTotal: number
+  analysisDate: string
+}

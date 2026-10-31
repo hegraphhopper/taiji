@@ -2,19 +2,19 @@
 
 ## 1. 顺序清单
 
-- [ ] 定义 `TrendQuery`、`TrendPointVO`、`AttributionVO`、`HeatmapVO`。
-- [ ] `TrendQueryService`：数据范围、过滤器、快照加载、月份去重、指标聚合。
-- [ ] `AttributionService`：项目对加载、视角换算、四类计数、按组矩阵、去重口径。
-- [ ] `HeatmapService`：项目组×月份、技术方向×项目组。
-- [ ] `TrendSummaryService`：规则摘要与阈值比较。
-- [ ] Controller + CSV 导出（BOM、文件名、口径说明）。
-- [ ] 后端测试：去重、聚合、归因、权限、空数据、导出。
-- [ ] 前端筛选栏 + URL 同步。
-- [ ] 趋势折线/柱组合图、归因 100% 堆叠柱、热力图。
-- [ ] 下钻抽屉：项目列表 → 项目对对比。
-- [ ] 结论摘要面板与空态。
-- [ ] 响应式与图表 resize 处理。
-- [ ] 演示数据下的视觉与数字核对，截图留档。
+- [x] 定义 `TrendQuery`、`TrendPointVO`、`AttributionVO`、`HeatmapVO`。
+- [x] `TrendQueryService`：数据范围、过滤器、快照加载、月份去重、指标聚合。
+- [x] `AttributionService`：项目对加载、视角换算、四类计数、按组矩阵、去重口径。
+- [x] `HeatmapService`：项目组×月份、技术方向×项目组。
+- [x] `TrendSummaryService`：规则摘要与阈值比较。
+- [x] Controller + CSV 导出（BOM、文件名、口径说明）。
+- [x] 后端测试：去重、聚合、归因、权限、空数据、导出。
+- [x] 前端筛选栏 + URL 同步。
+- [x] 趋势折线/柱组合图、归因 100% 堆叠柱、热力图。
+- [x] 下钻抽屉：项目列表 → 项目对对比。
+- [x] 结论摘要面板与空态。
+- [x] 响应式与图表 resize 处理。
+- [x] 演示数据下的视觉与数字核对，截图留档。
 
 ## 2. 验证命令
 

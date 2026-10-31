@@ -19,3 +19,7 @@ mybatis-plus:
 logging:
   level:
     com.taiji.fund: DEBUG
+
+app:
+  demo:
+    trend-seed: ${DEMO_TREND_SEED:true}

@@ -34,14 +34,14 @@
           <el-menu-item index="/analysis/runs">分析运行</el-menu-item>
           <el-menu-item v-if="isAdmin" index="/analysis/config">分析配置</el-menu-item>
         </el-sub-menu>
-        <el-menu-item index="/trend" disabled>
+        <el-menu-item v-if="canViewTrend" index="/trend">
           <el-icon><TrendCharts /></el-icon>
           <template #title>趋势与归因 <span class="phase-tag">A4</span></template>
         </el-menu-item>
       </el-menu>
 
       <div v-if="!collapsed" class="sidebar-foot">
-        <span class="dot"></span> A1 基础版 · 鉴权与底座
+        <span class="dot"></span> A4 趋势与归因 · 只读聚合
       </div>
     </el-aside>
 
@@ -142,6 +142,7 @@ const pageTitle = computed(() => (route.meta.title as string) || '工作台')
 const activeMenu = computed(() => route.path)
 const initial = computed(() => auth.displayName.slice(0, 1))
 const canAnalyze = computed(() => auth.hasRole('ADMIN', 'PMO'))
+const canViewTrend = computed(() => auth.hasRole('ADMIN', 'PMO', 'GROUP_USER'))
 const isAdmin = computed(() => auth.hasRole('ADMIN'))
 
 const passwordVisible = ref(false)

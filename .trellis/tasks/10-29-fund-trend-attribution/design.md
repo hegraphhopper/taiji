@@ -1,8 +1,22 @@
 # 重复度趋势与归因看板 — 技术设计
 
+## 0. 实施口径锁定（A4 开工前确认）
+
+| 项 | 结论 |
+|----|------|
+| 归因计数 | **项目视角**：直接汇总当月各项目快照的四类计数；跨组对在双方各计一次，与项目详情页一致 |
+| 项目对指标 | `pairCount = Σ(self_group_count + cross_group_count)`；`uniquePairCount` 由选定 run 的 `analysis_pair` 无序去重；`uniquePairCount ≤ pairCount` |
+| 高风险数 | `highRiskCount = count(snapshot.high_pair_count > 0)`；不做当前阈值回算，避免历史跳变 |
+| 高风险对数 | `highPairCount = Σ(high_pair_count)`（项目视角） |
+| 阈值展示 | 页面注明"高风险按各次分析时的阈值判定"；平均分指标与阈值无关 |
+| level 筛选 | 不在趋势顶部筛选；仅用于下钻项目列表/项目对明细 |
+| 时区 | 月度按快照 `analysis_date`（DATE）直接取 `YearMonth`；默认时间范围用 `Asia/Shanghai` 计算当前月 |
+| 图表 | 新增 ECharts 5，按需引入 line/bar/heatmap/grid/tooltip/legend |
+| 历史数据 | A4 提供 `demo` profile 历史样例 seeder 与 `scripts/backfill-trend.ps1`；D 阶段以正式演示数据替换 |
+
 ## 1. 数据来源与口径
 
-只读以下表，不新增业务表：
+只读以下表，不新增业务表（A4 不新增迁移）：
 
 - `duplicate_snapshot`：项目级月度指标（max_score、avg_top_score、归因计数、risk_exposure）。
 - `analysis_pair`：项目对明细（relation、direction、earlier_project_id、total_score、level）。

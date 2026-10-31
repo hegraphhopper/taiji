@@ -2,7 +2,7 @@
 
 面向电科太极平台基金、创新基金等自投研发项目的项目管理与重复投入治理平台。A 阶段聚焦核心主线：**结构化申报书 → 多维重复度分析 → 重复度趋势与归因**。
 
-当前版本为 A3 重复度分析版：在 A1 工程底座、A2 申报管理之上，完成可解释的多维重复度分析——运行级 TF-IDF、五维加权打分、四类归因、重复/差异片段、可选大模型语义融合与降级，以及项目重复度报告与运行记录。趋势归因在 A4 实现；角色管理与 OA 审批流在 C 阶段收尾。
+当前版本为 A4 趋势与归因版：在 A1 工程底座、A2 申报管理、A3 重复度分析之上，完成重复度趋势看板——按月/季/年聚合、四类归因构成、项目组归因矩阵、两种热力图、趋势点下钻与 CSV 导出。角色管理与 OA 审批流在 C 阶段收尾；投入态势与辅助决策在 B 阶段实现。
 
 ## 技术栈
 
@@ -127,6 +127,7 @@ npm run build
 │  ├─ project/                       项目主数据、结构化内容、状态机、查询
 │  ├─ document/                      附件上传、文本提取、章节解析
 │  ├─ analysis/                      分析配置、分词/向量/打分/归因、运行与查询
+│  ├─ insight/trend/                 趋势聚合、归因矩阵、热力图、摘要与 CSV
 │  ├─ health/                        健康检查
 │  └─ bootstrap/                     演示账号初始化
 ├─ src/main/resources/
@@ -135,7 +136,7 @@ npm run build
 │  ├─ prompts/duplicate-analysis.txt LLM 查重提示词
 │  └─ db/migration/                  Flyway V1 系统表、V2 种子、V3 项目、V4 分析
 ├─ frontend/                         Vue 3 + TypeScript 前端
-├─ scripts/                          start/stop/status 脚本
+├─ scripts/                          start/stop/status 与趋势历史回填脚本
 ├─ docs/                             产品设计与交付文档
 ├─ data/                             本地 H2 数据（git 忽略）
 ├─ storage/                          附件存储（git 忽略）
@@ -176,9 +177,31 @@ npm run build
 - 前端：分析运行页、分析配置页（ADMIN）、菜单按角色显隐
 - 性能：300 项目全量分析约 1.5s（门禁 5s）；性能用例默认排除，手动执行 `mvn test "-Dtest=AnalysisPerformanceTest" "-Dtest.excludedGroups=none"`
 
+## A4 已实现能力
+
+- 趋势指标：按月/季/年聚合，分析项目数、平均最高分、平均 Top-K 分、高风险项目数、项目对战与唯一对数、高风险对数、环比
+- 同比口径：同一项目在同一时间粒度内只取最新一次运行，跨月/跨季保留历史
+- 归因：四类计数与占比（项目视角）、按项目组归因矩阵；页面与 CSV 均标注"跨组对双方各计一次"
+- 热力图：项目组 × 月份、技术方向 × 项目组，可切换平均分/高风险项目数，tooltip 显示样本数
+- 下钻：点击趋势点 → 项目清单（可按等级过滤）→ 进入项目详情查看重复度报告；下钻条件写入 URL
+- 结论摘要：规则生成 3–5 句，数字与图表同源
+- 导出：UTF-8 BOM CSV，含口径说明与生成时间
+- 权限：PMO/ADMIN 全量，GROUP_USER 强制本组，EXPERT 无权访问（菜单隐藏 + 403）
+- 演示数据：`demo` 启动自动补 8 个历史项目（可用 `DEMO_TREND_SEED=false` 关闭），配合 `scripts/backfill-trend.ps1` 生成 8 个月真实快照
+- 性能：60 项目 × 24 月聚合约 133ms（门禁 500ms）；性能用例默认排除，手动执行 `mvn test "-Dtest=TrendPerformanceTest" "-Dtest.excludedGroups=none"`
+
+### 趋势演示数据初始化
+
+```powershell
+# 1) 启动演示（首次会写入 8 个历史项目）
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-demo.ps1
+# 2) 以 ADMIN 身份逐月回填近 8 个月分析快照
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/backfill-trend.ps1
+# 3) 打开 http://127.0.0.1:5173/trend
+```
+
 ## 尚未包含
 
-- 重复度趋势与归因看板（A4）
 - 用户/角色/项目组/技术方向管理界面（C）
 - 形式审查、专家评审、完整审批流（C）
 - 投入态势、辅助决策与报告导出（B）
@@ -190,6 +213,8 @@ npm run build
 - `.trellis/tasks/archive/2026-10/10-29-fund-declaration/`：A2 需求、设计、执行计划与验收报告
 - `.trellis/tasks/archive/2026-10/10-29-fund-dup-engine/`：A3 需求、设计、执行计划与测试用例
 - `.trellis/spec/backend/analysis-guidelines.md`：分析口径、接口、归因与降级契约
+- `.trellis/spec/backend/insight-guidelines.md`：趋势去重、项目视角口径、下钻与 CSV 契约
+- `.trellis/tasks/archive/2026-10/10-29-fund-trend-attribution/`：A4 需求、设计、用例与验收报告
 - `.trellis/tasks/10-29-fund-dup-platform/`：整体规划、设计、子任务拆分
 
 ## 常见问题
