@@ -1,0 +1,4 @@
+{"file": ".trellis/tasks/10-29-fund-delivery/test/用例设计.md", "reason": "D0 演示数据基线验收用例"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "构建、运行脚本与冒烟口径"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "演示库重建与种子幂等"}
+{"file": ".trellis/spec/backend/insight-guidelines.md", "reason": "趋势回填与四类归因验收口径"}

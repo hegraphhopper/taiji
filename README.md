@@ -187,18 +187,20 @@ npm run build
 - 结论摘要：规则生成 3–5 句，数字与图表同源
 - 导出：UTF-8 BOM CSV，含口径说明与生成时间
 - 权限：PMO/ADMIN 全量，GROUP_USER 强制本组，EXPERT 无权访问（菜单隐藏 + 403）
-- 演示数据：`demo` 启动自动补 8 个历史项目（可用 `DEMO_TREND_SEED=false` 关闭），配合 `scripts/backfill-trend.ps1` 生成 8 个月真实快照
+- 演示数据：`demo` 启动自动生成 **60 个项目**（2024–2026、8 个项目组、7 种状态、四类归因样本；`DEMO_DATA_SEED=false` 可关闭），配合 `scripts/backfill-trend.ps1 -Months 14` 生成近 14 个月真实快照
 - 性能：60 项目 × 24 月聚合约 133ms（门禁 500ms）；性能用例默认排除，手动执行 `mvn test "-Dtest=TrendPerformanceTest" "-Dtest.excludedGroups=none"`
 
-### 趋势演示数据初始化
+### 演示数据初始化
 
 ```powershell
-# 1) 启动演示（首次会写入 8 个历史项目）
+# 1) 启动演示（首次自动写入 60 个演示项目，幂等）
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-demo.ps1
-# 2) 以 ADMIN 身份逐月回填近 8 个月分析快照
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/backfill-trend.ps1
+# 2) 以 ADMIN 身份逐月回填近 14 个月分析快照（约 1-3 分钟）
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/backfill-trend.ps1 -Months 14
 # 3) 打开 http://127.0.0.1:5173/trend
 ```
+
+演示数据规模：60 个项目、8 个项目组、4 类技术方向分布、7 种状态；同组重复 2 对、跨组在先 6 对、同期并行 2 对，其余为低重复/无关主题；每项目含目标、研制内容、关键技术、节点与成员。
 
 ## 尚未包含
 

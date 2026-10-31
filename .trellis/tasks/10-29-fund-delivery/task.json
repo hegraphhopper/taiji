@@ -3,7 +3,7 @@
   "name": "fund-delivery",
   "title": "交付物与部署验证",
   "description": "README、需求分析与设计文档、演示数据、数据库备份脚本与备份文件、运行截图/演示脚本、WeCode 部署验证",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,

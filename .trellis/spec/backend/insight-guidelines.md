@@ -26,7 +26,7 @@ HeatmapService.heatmap
 TrendSummaryService.summarize
 TrendDataLoader.load/dedup/rangeOf
 TrendCsvExporter.export
-DemoTrendSeedRunner（demo profile）
+DemoDataInitializer（demo profile，60 项目基线）
 ```
 
 ## 3. Contracts
@@ -70,8 +70,9 @@ DemoTrendSeedRunner（demo profile）
 
 ### 演示历史数据
 
-- `DemoTrendSeedRunner`：仅 demo profile、`app.demo.trend-seed=true`、非 test profile 时执行；按 `DEMO-TREND-` 前缀幂等。
-- 生成 8 个已提交项目，`submit_time` 回填近 8 个月，覆盖 4 个项目组、4 个技术方向、4 对近似主题。
+- `DemoDataInitializer`：仅 demo profile、`app.demo.data-seed=true`、非 test profile 时执行；按 `DEMO-` 前缀幂等。
+- 生成 60 个项目（2024–2026 提交时间、8 个项目组、7 种状态），其中 10 对近似主题：同组 2 对、跨组间隔 3 个月 6 对、跨组 10 天内 2 对，其余 40 个低重复；每项目含目标/内容/关键技术/节点/成员。
+- 回填使用 `scripts/backfill-trend.ps1 -Months 14`，得到 ≥12 个趋势点，四类归因均有样本。
 - `scripts/backfill-trend.ps1` 以 ADMIN 身份逐月调用 `POST /analysis/runs {triggerType:FULL, analysisDate}`，生成真实月度快照；可重复执行（同月保留多 run，趋势取最新）。
 - A3 的 `analysisDate` 运行**不回写** `project.duplicate_score/risk_level`，避免历史回填覆盖最新结论。
 
@@ -88,7 +89,7 @@ DemoTrendSeedRunner（demo profile）
 
 ## 5. Good / Base / Bad
 
-- Good：8 个月数据、四类归因齐全，`pairCount = 四类之和`，`uniquePairCount ≤ pairCount`，页面/CSV/下钻数字一致。
+- Good：14 个月数据、四类归因齐全，`pairCount = 四类之和`，`uniquePairCount ≤ pairCount`，页面/CSV/下钻数字一致。
 - Base：无数据时 `hasData=false`、`points=[]`、摘要提示"暂无可分析数据"，HTTP 200。
 - Bad：跨组对在明细存储双向导致 `pairCount` 翻倍；按当前阈值重算历史高风险数导致曲线跳变。
 - Bad：`GROUP_USER` 传他组 `groupId` 就能看到全所数据。

@@ -1,5 +1,19 @@
 # 交付物与部署验证 — 技术设计
 
+## 0. D0 实施记录（提前执行，2026-10-31）
+
+- 类：`com.taiji.fund.bootstrap.DemoDataInitializer`（替换原 `DemoTrendSeedRunner`）。
+- 开关：`app.demo.data-seed`（`DEMO_DATA_SEED`，默认 true）；`test` profile 与 prod 不执行。
+- 幂等：按 `DEMO-` 编码前缀计数，存在即跳过。
+- 规模：60 项目 = 10 对近似主题（20）+ 40 个独立主题；8 组、7 种状态、2024–2026 提交时间。
+- 近似主题类型：
+  - `SELF` 同组 2 对（提交相差 1 个月，`relation=SELF_GROUP`）
+  - `GAP` 跨组 6 对（相差 3 个月，>30 天，产生 A_EARLIER/B_EARLIER）
+  - `SIMULTANEOUS` 跨组 2 对（相差 10 天，`SIMULTANEOUS`）
+- 文本：同对共享 90% 目标与内容；独立主题使用 40 个不同领域名 + 模板句，靠 IDF 抑制模板词。
+- 结构化内容：每项目 1 目标、2 内容、3 关键技术、3 节点、2 成员。
+- 回填：`scripts/backfill-trend.ps1 -Months 14`，逐月 `analysisDate=FULL`；analysisDate 运行不回写项目当前分数。
+- 附件：本阶段不生成真实文件，D 阶段补 20+ 附件元数据与样例 docx/pdf/md。
 ## 1. 演示数据设计
 
 ### 1.1 初始化方式

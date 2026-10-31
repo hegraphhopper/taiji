@@ -22,4 +22,4 @@ logging:
 
 app:
   demo:
-    trend-seed: ${DEMO_TREND_SEED:true}
+    data-seed: ${DEMO_DATA_SEED:true}

@@ -1,3 +1,11 @@
+## 0. D0 执行记录（2026-10-31 已完成）
+
+- [x] `DemoDataInitializer` 60 项目 / 8 组 / 7 状态 / 四类归因样本
+- [x] 删除旧 `DemoTrendSeedRunner`，开关改为 `DEMO_DATA_SEED`
+- [x] 清空 `data/` 重建；冷启动与重启幂等验证（60 不变）
+- [x] `scripts/backfill-trend.ps1 -Months 14`：14 个趋势点，四类归因 >0
+- [x] `mvn -q test` 136 项零回归
+- [ ] 附件样例（转 D 阶段）
 # 交付物与部署验证 — 实施计划
 
 ## 1. 顺序清单
