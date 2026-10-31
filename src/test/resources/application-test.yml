@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:fundtest-${random.uuid};MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+  h2:
+    console:
+      enabled: false
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+
+app:
+  jwt:
+    secret: test-only-fund-platform-jwt-secret-0123456789abcdef
+    expire-hours: 8
+
+logging:
+  level:
+    root: WARN
+    com.taiji.fund: INFO
