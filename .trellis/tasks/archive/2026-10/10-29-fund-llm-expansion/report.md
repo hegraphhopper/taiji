@@ -4,7 +4,7 @@
 
 - 连接自检：`POST /api/v1/system/llm/test`（ADMIN），返回 `success/status/latency/model/message`，不含 Key；分析配置页新增“测试连接”。
 - 决策预检：`AnalysisExecutor.precheck` 对 Top-1 相似对调用模型，返回 `llmUsed/llmReason`；风险分与规则建议不变；失败自动降级。
-- 重复/差异点：V7 新增 `analysis_pair.llm_overlaps`、`llm_differences`；`PeerMatchVO` / `PairDetailVO` 贯通；项目详情展示模型重复点/差异点。
+- 重复/差异点：V7 新增 `analysis_pair.llm_overlaps`、`llm_differences`；`PeerMatchVO` / `PairDetailVO` 贯通；项目详情展示大模型分析重复点/差异点。
 - 报告：Word 新增“六、大模型复核”；Excel 新增“模型复核”Sheet；无模型数据时输出“本地算法结果”。
 - 前端：分析配置测试连接、项目详情模型复核点、决策预检模型理由。
 

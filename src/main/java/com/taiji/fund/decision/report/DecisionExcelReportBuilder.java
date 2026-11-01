@@ -109,7 +109,7 @@ public class DecisionExcelReportBuilder {
 
     private void llmSheet(SXSSFWorkbook workbook, List<PeerMatchVO> peers) {
         Sheet sheet = workbook.createSheet("模型复核");
-        String[] headers = {"序号", "项目名称", "模型结论", "模型重复点", "模型差异点"};
+        String[] headers = {"序号", "项目名称", "模型结论", "大模型分析重复点", "大模型分析差异点"};
         header(sheet, headers);
         int rowIndex = 1;
         int sequence = 1;

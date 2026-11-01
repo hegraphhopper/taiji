@@ -311,13 +311,13 @@
                     </div>
                     <div v-if="peer.llmOverlaps?.length || peer.llmDifferences?.length" class="llm-points">
                       <div v-if="peer.llmOverlaps?.length" class="point-block">
-                        <h4>模型重复点</h4>
+                        <h4>大模型分析重复点</h4>
                         <ul>
                           <li v-for="(item, index) in peer.llmOverlaps" :key="`lo-${index}`">{{ item }}</li>
                         </ul>
                       </div>
                       <div v-if="peer.llmDifferences?.length" class="point-block">
-                        <h4>模型差异点</h4>
+                        <h4>大模型分析差异点</h4>
                         <ul>
                           <li v-for="(item, index) in peer.llmDifferences" :key="`ld-${index}`">{{ item }}</li>
                         </ul>

@@ -144,10 +144,10 @@ public class DecisionWordReportBuilder {
             String name = peer.getPeer() == null ? "相似项目" : value(peer.getPeer().getName(), "相似项目");
             paragraph(document, name + "：" + value(peer.getLlmReason(), "无结论"));
             if (hasOverlaps) {
-                paragraph(document, "模型重复点：" + String.join("；", peer.getLlmOverlaps()));
+                paragraph(document, "大模型分析重复点：" + String.join("；", peer.getLlmOverlaps()));
             }
             if (hasDifferences) {
-                paragraph(document, "模型差异点：" + String.join("；", peer.getLlmDifferences()));
+                paragraph(document, "大模型分析差异点：" + String.join("；", peer.getLlmDifferences()));
             }
         }
         if (!has) {

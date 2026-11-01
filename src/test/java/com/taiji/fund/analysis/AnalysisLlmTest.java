@@ -87,7 +87,7 @@ class AnalysisLlmTest extends AbstractAnalysisTest {
         String admin = adminToken();
         saveConfig(admin, 70, 30);
         doReturn(LlmCallResult.success(new LlmResponse(88D, Arrays.asList("模型重叠点"),
-                        Arrays.asList("模型差异点"), "EXPLAIN", "模型复核结论"), 10L, 8, 4))
+                        Arrays.asList("大模型分析差异点"), "EXPLAIN", "模型复核结论"), 10L, 8, 4))
                 .when(llmClient).call(any(), any(), any());
 
         MvcResult result = mockMvc.perform(post("/api/v1/analysis/precheck")
