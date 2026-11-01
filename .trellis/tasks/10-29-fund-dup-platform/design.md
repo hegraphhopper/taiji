@@ -314,8 +314,8 @@ java -jar target/fund-platform-1.0.0.jar --spring.profiles.active=demo
 ### 11.1 默认解释层
 
 - `analysis_config` 默认 `local_weight=100 / llm_weight=0`，即模型分只作解释，不参与总分。
-- 新库由 `V4__analysis_schema.sql` 种子直接写入 100/0。
-- 旧库由 `V8__llm_explanation_default.sql` 迁移：仅当 `local_weight=70 AND llm_weight=30 AND llm_enabled=0` 时改为 100/0，避免覆盖用户显式配置。
+- `V4__analysis_schema.sql` 保持历史默认 70/30，不修改已发布迁移，避免既有库 checksum 校验失败。
+- 新库与旧库统一由 `V8__llm_explanation_default.sql` 迁移：仅当 `local_weight=70 AND llm_weight=30 AND llm_enabled=0` 时改为 100/0，避免覆盖用户显式配置。
 - `AnalysisConfigService` 的缺省值同步为 100/0；前端表单默认值同步，页面提示“解释层建议 100/0”。
 
 ### 11.2 有界重试

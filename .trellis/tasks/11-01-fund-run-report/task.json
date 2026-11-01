@@ -1,0 +1,30 @@
+{
+  "id": "fund-run-report",
+  "name": "fund-run-report",
+  "title": "分析运行报告查看",
+  "description": "在分析运行历史旁增加“查看报告”按钮，直接展示该次运行已保存的重复项目对及重复/差异点",
+  "status": "completed",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P1",
+  "creator": "wangkuo@core.ez",
+  "assignee": "wangkuo@core.ez",
+  "createdAt": "2026-11-01",
+  "completedAt": "2026-11-01",
+  "branch": null,
+  "base_branch": "wecode/member-shangcirenwuzhix-779d",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "10-29-fund-dup-platform",
+  "relatedFiles": [
+    "frontend/src/views/analysis/AnalysisRunsView.vue",
+    "src/main/java/com/taiji/fund/analysis/result/AnalysisQueryController.java",
+    "src/main/java/com/taiji/fund/analysis/result/AnalysisQueryService.java"
+  ],
+  "notes": "最小方案：仅新增按运行查询项目对的只读接口 + 运行历史行内查看报告弹窗；不做新页面与导出。",
+  "meta": {}
+}

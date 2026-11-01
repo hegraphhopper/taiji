@@ -1,0 +1,3 @@
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "前端质量门禁与构建检查"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "复用现有项目对数据结构与样式，避免重复实现"}
+{"file": ".trellis/tasks/11-01-fund-run-report/test/用例设计.md", "reason": "演示验收用例"}

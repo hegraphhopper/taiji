@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/frontend/index.md", "reason": "前端规范索引与开发前检查"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "页面与组件设计约定"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "前端交互、空态与构建检查"}
+{"file": ".trellis/tasks/10-29-fund-dup-platform/research/architecture-decisions.md", "reason": "项目环境与既有技术取舍"}

@@ -9,6 +9,7 @@ import com.taiji.fund.analysis.result.dto.DuplicateSnapshotVO;
 import com.taiji.fund.analysis.result.dto.PairDetailVO;
 import com.taiji.fund.analysis.result.dto.PeerMatchVO;
 import com.taiji.fund.analysis.result.dto.ProjectAnalysisReportVO;
+import com.taiji.fund.analysis.result.dto.RunPairVO;
 import com.taiji.fund.analysis.score.DuplicateLevel;
 import com.taiji.fund.common.exception.BizException;
 import com.taiji.fund.common.exception.ErrorCode;
@@ -22,8 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 分析结果查询：项目报告、Top-K 相似项目、项目对明细。数据范围在服务层强制校验。
@@ -82,6 +85,33 @@ public class AnalysisQueryService {
                 .thresholds(thresholds.toMap())
                 .analyzed(snapshot != null)
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<RunPairVO> runPairs(Long runId) {
+        AnalysisRun run = runMapper.selectById(runId);
+        if (run == null) {
+            throw new BizException(ErrorCode.ANALYSIS_RUN_NOT_FOUND);
+        }
+        List<AnalysisPair> pairs = pairMapper.selectList(Wrappers.<AnalysisPair>lambdaQuery()
+                .eq(AnalysisPair::getRunId, runId)
+                .orderByDesc(AnalysisPair::getTotalScore)
+                .orderByAsc(AnalysisPair::getId));
+        if (pairs.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Set<Long> projectIds = new LinkedHashSet<>();
+        for (AnalysisPair pair : pairs) {
+            projectIds.add(pair.getProjectId());
+            projectIds.add(pair.getPeerProjectId());
+        }
+        Map<Long, AnalysisProjectBriefVO> briefs = briefAssembler.assembleByIds(projectIds);
+        List<RunPairVO> result = new ArrayList<>(pairs.size());
+        for (AnalysisPair pair : pairs) {
+            result.add(presenter.toRunPair(pair,
+                    briefs.get(pair.getProjectId()), briefs.get(pair.getPeerProjectId())));
+        }
+        return result;
     }
 
     @Transactional(readOnly = true)

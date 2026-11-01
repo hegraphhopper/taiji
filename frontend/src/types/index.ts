@@ -315,6 +315,25 @@ export interface DimensionScores {
   tag: number
 }
 
+export interface RunReportPair {
+  pairId: number
+  project: AnalysisProjectBrief
+  peer: AnalysisProjectBrief
+  scores: DimensionScores
+  localScore: number
+  llmScore: number | null
+  totalScore: number
+  level: DuplicateLevel
+  relation: string
+  direction: 'SELF_GROUP' | 'SIMULTANEOUS' | 'A_EARLIER' | 'B_EARLIER'
+  earlierProjectId: number | null
+  matchedPoints: MatchPoint[]
+  diffPoints: MatchPoint[]
+  llmReason: string | null
+  llmOverlaps: string[] | null
+  llmDifferences: string[] | null
+}
+
 export interface MatchPoint {
   dimension: string
   terms: string[]

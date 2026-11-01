@@ -290,8 +290,8 @@ CREATE TABLE analysis_config (
     top_k INT NOT NULL DEFAULT 5,
     simultaneous_days INT NOT NULL DEFAULT 30,
     llm_enabled TINYINT NOT NULL DEFAULT 0,
-    local_weight INT NOT NULL DEFAULT 100,
-    llm_weight INT NOT NULL DEFAULT 0,
+    local_weight INT NOT NULL DEFAULT 70,
+    llm_weight INT NOT NULL DEFAULT 30,
     llm_top_n INT NOT NULL DEFAULT 5,
     llm_timeout_ms INT NOT NULL DEFAULT 8000,
     active TINYINT NOT NULL DEFAULT 1,
@@ -310,7 +310,7 @@ INSERT INTO analysis_config (
     1,
     '{"goal":15,"content":35,"tech":35,"milestone":5,"tag":10}',
     '{"high":80,"medium":60,"low":40}',
-    5, 30, 0, 100, 0, 5, 8000, 1, NULL, CURRENT_TIMESTAMP
+    5, 30, 0, 70, 30, 5, 8000, 1, NULL, CURRENT_TIMESTAMP
 );
 
 CREATE TABLE analysis_run (

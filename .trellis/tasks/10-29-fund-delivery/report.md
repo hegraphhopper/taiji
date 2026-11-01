@@ -61,11 +61,11 @@
 - 项目 #2：最高重复度 91.60；Top-1 `totalScore=91.60`、`localScore=91.60`、`llmScore=90`，包含模型理由/重复点/差异点。
 - 预检项目 #42：`llmUsed=true`，风险分 35.03 与本地一致，模型分 76，建议动作不变。
 - 模型调用日志：8 次调用，7 成功、1 失败，平均 3393 ms。
-- Word 报告含“六、大模型复核”、模型重复点/差异点；Excel 含“模型复核”Sheet。
+- Word 报告含“六、大模型复核”、大模型分析重复点/差异点；Excel 含“模型复核”Sheet。
 
 ### 大模型收口（2026-11-01）
 
-- 默认权重改为解释层 100/0：`V4` 种子、`AnalysisConfigService` 缺省值、前端表单同步；新增 `V8__llm_explanation_default.sql` 迁移旧库 70/30（仅 `llm_enabled=0`）。
+- 默认权重改为解释层 100/0：`AnalysisConfigService` 缺省值、前端表单同步；`V4` 保持历史 70/30 不改（避免 checksum 漂移），由 `V8__llm_explanation_default.sql` 统一迁移新库/旧库的 70/30（仅 `llm_enabled=0`）。
 - `LlmClient` 增加有界重试：超时/连接异常/5xx 最多 2 次尝试；4xx 与非法 JSON 不重试；熔断按调用计数，日志每次调用一条。
 - 可复现：`.env.example` 增加 `LLM_*`；`start-demo.ps1` 检测 `application-local.yml` 自动加载；README 与用户手册写明口径与限制。
 - 验证：`mvn -q test` 178/178；`npm run typecheck`、`npm run build` 退出码 0。

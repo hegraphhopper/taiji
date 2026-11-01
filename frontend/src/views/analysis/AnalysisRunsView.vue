@@ -111,8 +111,11 @@
             <span v-else class="faint">—</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="110" fixed="right">
+        <el-table-column label="操作" width="150" fixed="right">
           <template #default="{ row }">
+            <el-button v-if="canReport(row)" link type="primary" @click="openReport(row)">
+              查看报告
+            </el-button>
             <el-button
               v-if="isAdmin && row.status === 'FAILED'"
               link
@@ -121,7 +124,7 @@
             >
               删除
             </el-button>
-            <span v-else class="faint">—</span>
+            <span v-if="!canReport(row) && !(isAdmin && row.status === 'FAILED')" class="faint">—</span>
           </template>
         </el-table-column>
       </el-table>
@@ -138,6 +141,8 @@
         />
       </div>
     </section>
+
+    <RunReportDialog v-model="reportVisible" :run="reportRun" :pairs="reportPairs" :loading="reportLoading" />
   </div>
 </template>
 
@@ -148,11 +153,13 @@ import { Refresh, VideoPlay } from '@element-plus/icons-vue'
 import {
   deleteAnalysisRun,
   getAnalysisRuns,
+  getAnalysisRunPairs,
   triggerAnalysisRun
 } from '@/api/analysis'
 import { getProjects } from '@/api/project'
+import RunReportDialog from '@/components/analysis/RunReportDialog.vue'
 import { useAuthStore } from '@/stores/auth'
-import type { AnalysisRun, AnalysisTriggerType, ProjectListItem } from '@/types'
+import type { AnalysisRun, AnalysisTriggerType, ProjectListItem, RunReportPair } from '@/types'
 
 const auth = useAuthStore()
 const isAdmin = computed(() => auth.hasRole('ADMIN'))
@@ -172,6 +179,11 @@ const filterType = ref('')
 const filterStatus = ref('')
 
 const projectOptions = ref<ProjectListItem[]>([])
+
+const reportVisible = ref(false)
+const reportRun = ref<AnalysisRun | null>(null)
+const reportPairs = ref<RunReportPair[]>([])
+const reportLoading = ref(false)
 
 onMounted(() => {
   loadProjects()
@@ -248,6 +260,24 @@ async function remove(run: AnalysisRun): Promise<void> {
     await reload()
   } catch (exception) {
     ElMessage.error(exception instanceof Error ? exception.message : '删除失败')
+  }
+}
+
+function canReport(run: AnalysisRun): boolean {
+  return run.status === 'SUCCESS' && run.triggerType !== 'PRECHECK'
+}
+
+async function openReport(run: AnalysisRun): Promise<void> {
+  reportRun.value = run
+  reportPairs.value = []
+  reportVisible.value = true
+  reportLoading.value = true
+  try {
+    reportPairs.value = await getAnalysisRunPairs(run.id)
+  } catch (exception) {
+    ElMessage.error(exception instanceof Error ? exception.message : '分析报告加载失败')
+  } finally {
+    reportLoading.value = false
   }
 }
 

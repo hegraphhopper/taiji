@@ -7,6 +7,7 @@ import com.taiji.fund.analysis.result.dto.AnalysisProjectBriefVO;
 import com.taiji.fund.analysis.result.dto.DimensionScoresVO;
 import com.taiji.fund.analysis.result.dto.PairDetailVO;
 import com.taiji.fund.analysis.result.dto.PeerMatchVO;
+import com.taiji.fund.analysis.result.dto.RunPairVO;
 import com.taiji.fund.analysis.score.DuplicateLevel;
 import com.taiji.fund.analysis.score.MatchPoint;
 import lombok.RequiredArgsConstructor;
@@ -98,6 +99,28 @@ public class AnalysisPairPresenter {
                 .llmOverlaps(parseStrings(pair.getLlmOverlaps()))
                 .llmDifferences(parseStrings(pair.getLlmDifferences()))
                 .suggestion(suggestion)
+                .build();
+    }
+
+    public RunPairVO toRunPair(AnalysisPair pair, AnalysisProjectBriefVO project,
+                               AnalysisProjectBriefVO peer) {
+        return RunPairVO.builder()
+                .pairId(pair.getId())
+                .project(project)
+                .peer(peer)
+                .scores(scores(pair))
+                .localScore(pair.getLocalScore())
+                .llmScore(pair.getLlmScore())
+                .totalScore(pair.getTotalScore())
+                .level(pair.getLevel())
+                .relation(pair.getRelation())
+                .direction(pair.getDirection())
+                .earlierProjectId(pair.getEarlierProjectId())
+                .matchedPoints(parsePoints(pair.getMatchedPoints()))
+                .diffPoints(parsePoints(pair.getDiffPoints()))
+                .llmReason(pair.getLlmReason())
+                .llmOverlaps(parseStrings(pair.getLlmOverlaps()))
+                .llmDifferences(parseStrings(pair.getLlmDifferences()))
                 .build();
     }
 

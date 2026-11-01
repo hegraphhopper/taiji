@@ -204,7 +204,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/backfill-trend.ps1 -
 
 ## 已包含
 
-- A 阶段：登录/JWT/角色、项目与申报书、附件解析、重复度分析、趋势归因。
+- A 阶段：登录/JWT/角色、项目与申报书、附件解析、重复度分析、运行报告、趋势归因。
 - B 阶段：投入态势、辅助决策、决策记录、Word/Excel 报告。
 - C 阶段：四角色权限、用户/组/字典/参数/审计、专家评审、审批流、待办。
 - D 阶段：60 项目演示数据、14 个月趋势回填、H2 备份脚本、MySQL schema、文档与截图。

@@ -4,6 +4,7 @@ import com.taiji.fund.analysis.result.dto.AnalysisPrecheckRequest;
 import com.taiji.fund.analysis.result.dto.AnalysisPrecheckVO;
 import com.taiji.fund.analysis.result.dto.PairDetailVO;
 import com.taiji.fund.analysis.result.dto.ProjectAnalysisReportVO;
+import com.taiji.fund.analysis.result.dto.RunPairVO;
 import com.taiji.fund.analysis.run.AnalysisRunService;
 import com.taiji.fund.common.api.Result;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * 分析查询接口：项目报告、项目对明细、预检。
@@ -36,6 +38,12 @@ public class AnalysisQueryController {
     @GetMapping("/pairs/{id}")
     public Result<PairDetailVO> pairDetail(@PathVariable Long id) {
         return Result.ok(queryService.pairDetail(id));
+    }
+
+    @GetMapping("/runs/{id}/pairs")
+    @PreAuthorize("hasAnyRole('PMO','ADMIN')")
+    public Result<List<RunPairVO>> runPairs(@PathVariable Long id) {
+        return Result.ok(queryService.runPairs(id));
     }
 
     @PostMapping("/precheck")

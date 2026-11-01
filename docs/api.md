@@ -36,6 +36,7 @@
 | POST | `/analysis/runs` | PMO/ADMIN | 触发分析 |
 | GET | `/analysis/runs` | PMO/ADMIN | 运行列表 |
 | GET/DELETE | `/analysis/runs/{id}` | 登录/ADMIN | 运行详情/删除 |
+| GET | `/analysis/runs/{id}/pairs` | PMO/ADMIN | 运行报告：该次运行的项目对、分维度分、归因与重复/差异点 |
 | GET | `/analysis/projects/{id}` | 登录 | 项目重复度报告 |
 | GET | `/analysis/pairs/{id}` | 登录 | 相似对明细 |
 | POST | `/analysis/precheck` | GROUP_USER/PMO/ADMIN | 预检（Top-1 可带模型解释） |

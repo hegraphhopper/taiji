@@ -11,6 +11,7 @@ import type {
   PageResult,
   PairDetail,
   ProjectAnalysisReport,
+  RunReportPair,
   LlmTestResult,
   LlmLogPage
 } from '@/types'
@@ -65,6 +66,12 @@ export function deleteAnalysisRun(id: number): Promise<void> {
 export function getProjectAnalysis(projectId: number): Promise<ProjectAnalysisReport> {
   return http
     .get<ApiResult<ProjectAnalysisReport>>(`/analysis/projects/${projectId}`)
+    .then((response) => response.data.data)
+}
+
+export function getAnalysisRunPairs(runId: number): Promise<RunReportPair[]> {
+  return http
+    .get<ApiResult<RunReportPair[]>>(`/analysis/runs/${runId}/pairs`)
     .then((response) => response.data.data)
 }
 
