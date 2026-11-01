@@ -42,7 +42,7 @@
 ## 5. 截图
 
 - `docs/screenshots/governance/`：16 张，四角色与系统管理
-- `docs/screenshots/core/`：8 张（工作台、项目列表、项目详情、分析运行、趋势、投入、决策、决策记录）
+- `docs/screenshots/core/`：10 张（工作台、项目列表、项目详情、分析运行、趋势、投入、决策、决策记录）
 
 ## 6. 门户填报信息（待补）
 

@@ -1,6 +1,6 @@
 # 截图索引
 
-## core（8 张）
+## core（10 张）
 
 | 文件 | 页面 |
 |------|------|
@@ -12,6 +12,8 @@
 | `core/06-investment.png` | 投入态势 |
 | `core/07-decision.png` | 辅助决策预检 |
 | `core/08-decision-records.png` | 决策记录 |
+| `core/09-llm-logs.png` | 模型调用日志 |
+| `core/10-llm-config.png` | 分析配置（大模型） |
 
 ## governance（16 张）
 
