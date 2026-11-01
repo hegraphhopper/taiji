@@ -93,7 +93,7 @@ if (-not $SkipBackend) {
             throw "Jar not found: $jar. Run without -SkipBuild first."
         }
         $process = Start-Process -FilePath 'java' `
-            -ArgumentList '-jar', $jar, '--spring.profiles.active=demo' `
+            -ArgumentList '-Djavax.net.ssl.trustStoreType=Windows-ROOT', '-jar', $jar, '--spring.profiles.active=demo' `
             -WorkingDirectory $root `
             -WindowStyle Hidden `
             -RedirectStandardOutput (Join-Path $targetDir 'app.out.log') `

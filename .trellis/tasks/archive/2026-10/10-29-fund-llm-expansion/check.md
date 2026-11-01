@@ -15,3 +15,11 @@
 
 - 真实模型联调：需注入 `LLM_BASE_URL/LLM_API_KEY/LLM_MODEL` 后执行一次成功调用。
 - 调用日志页面未实现（API/表已具备），不在本轮核心范围。
+
+## 真实联调补充（2026-11-01）
+
+- 真实模型连接成功（DeepSeek deepseek-flash，985 ms）。
+- 分析运行 `llmUsed=true`，解释层总分与本地一致。
+- 预检 `llmUsed=true`，风险分不变。
+- 模型调用日志、Word/Excel 复核段均已验证。
+- 剩余：Key 仅在本机 `application-local.yml`，未提交；演示后轮换。

@@ -55,4 +55,5 @@
 - **端口占用**：先执行 `scripts/stop-demo.ps1`。
 - **H2 锁**：不要同时启动两个后端指向同一 `data/`。
 - **大模型未生效**：检查 `LLM_ENABLED/LLM_BASE_URL/LLM_MODEL/LLM_API_KEY`，并在分析配置页开启；点击“测试连接”。
+- **大模型报 PKIX/证书错误**：Windows + JDK 8 使用 `-Djavax.net.ssl.trustStoreType=Windows-ROOT`（启动脚本已内置）；Linux 需导入 CA。
 - **趋势无数据**：执行分析运行或 `scripts/backfill-trend.ps1 -Months 14`。

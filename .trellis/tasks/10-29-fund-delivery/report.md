@@ -51,3 +51,14 @@
 - mvn -q -DskipTests package：退出码 0。
 - npm run typecheck / build：退出码 0。
 - 自检未配置：DISABLED；预检降级：llmUsed=false，Top-1 35.03。
+
+### 真实大模型联调（2026-11-01）
+
+- 配置：项目根目录 `application-local.yml`（已 gitignore，未提交）；`base-url=https://api.deepseek.com`，`model=deepseek-flash`。
+- 启动：`SPRING_CONFIG_ADDITIONAL_LOCATION=optional:file:./application-local.yml`；JDK 8 证书问题通过 `-Djavax.net.ssl.trustStoreType=Windows-ROOT` 解决（已写入启动脚本）。
+- 连接自检：`success=true`，985 ms，模型 `deepseek-flash`。
+- FULL 分析运行 #24：`llmUsed=true`，56 个项目、19 个相似对、20.8 s。
+- 项目 #2：最高重复度 91.60；Top-1 `totalScore=91.60`、`localScore=91.60`、`llmScore=90`，包含模型理由/重复点/差异点。
+- 预检项目 #42：`llmUsed=true`，风险分 35.03 与本地一致，模型分 76，建议动作不变。
+- 模型调用日志：8 次调用，7 成功、1 失败，平均 3393 ms。
+- Word 报告含“六、大模型复核”、模型重复点/差异点；Excel 含“模型复核”Sheet。

@@ -25,3 +25,13 @@
 - 当前环境未注入 `LLM_BASE_URL/LLM_API_KEY/LLM_MODEL`，因此真实模型调用未联调；代码路径、失败降级与 mock 成功路径均已验证。
 - 配置真实模型后，按“解释层”模式设置 `localWeight=100 / llmWeight=0`，总分与趋势不变。
 - 未执行 `git push`：仓库未配置 remote。
+
+## 4. 真实模型联调补充（2026-11-01）
+
+- `application-local.yml`（根目录、gitignore）配置 DeepSeek：`https://api.deepseek.com` / `deepseek-flash`。
+- JDK 8 需 `-Djavax.net.ssl.trustStoreType=Windows-ROOT`；已写入 `scripts/start-demo.ps1`。
+- 自检：成功，985 ms。
+- FULL 分析：`llmUsed=true`，56 项目 / 19 对 / 20.8 s；项目 #2 总分 91.60 与本地一致，模型分 90，理由/重复点/差异点入库。
+- 预检 #42：`llmUsed=true`，风险分 35.03 不变，模型分 76。
+- 日志：8 次，7 成功，平均 3393 ms。
+- Word/Excel 报告已含模型复核段。
