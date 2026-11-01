@@ -32,6 +32,7 @@
             <span>分析中心 <span class="phase-tag">A3</span></span>
           </template>
           <el-menu-item index="/analysis/runs">分析运行</el-menu-item>
+          <el-menu-item index="/analysis/llm-logs">模型调用日志</el-menu-item>
           <el-menu-item v-if="isAdmin" index="/analysis/config">分析配置</el-menu-item>
         </el-sub-menu>
         <el-menu-item v-if="canViewTrend" index="/trend">

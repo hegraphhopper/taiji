@@ -132,6 +132,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '分析运行', roles: ['PMO', 'ADMIN'] }
       },
       {
+        path: 'analysis/llm-logs',
+        name: 'analysis-llm-logs',
+        component: () => import('@/views/analysis/LlmLogsView.vue'),
+        meta: { title: '模型调用日志', roles: ['PMO', 'ADMIN'] }
+      },
+      {
         path: 'analysis/config',
         name: 'analysis-config',
         component: () => import('@/views/analysis/AnalysisConfigView.vue'),

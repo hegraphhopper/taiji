@@ -11,7 +11,8 @@ import type {
   PageResult,
   PairDetail,
   ProjectAnalysisReport,
-  LlmTestResult
+  LlmTestResult,
+  LlmLogPage
 } from '@/types'
 
 export function getAnalysisConfig(): Promise<AnalysisConfig> {
@@ -82,5 +83,23 @@ export function precheckAnalysis(payload: AnalysisPrecheckPayload): Promise<Anal
 export function testLlmConnection(): Promise<LlmTestResult> {
   return http
     .post<ApiResult<LlmTestResult>>('/system/llm/test')
+    .then((response) => response.data.data)
+}
+
+export function getLlmLogs(params: {
+  page: number
+  size: number
+  runId?: number | null
+  status?: string
+  model?: string
+}): Promise<LlmLogPage> {
+  const search = new URLSearchParams()
+  search.set('page', String(params.page))
+  search.set('size', String(params.size))
+  if (params.runId) search.set('runId', String(params.runId))
+  if (params.status) search.set('status', params.status)
+  if (params.model) search.set('model', params.model)
+  return http
+    .get<ApiResult<LlmLogPage>>(`/analysis/llm-logs?${search.toString()}`)
     .then((response) => response.data.data)
 }

@@ -416,6 +416,32 @@ export interface LlmTestResult {
   message: string
 }
 
+export interface LlmCallLog {
+  id: number
+  runId: number | null
+  projectId: number | null
+  peerProjectId: number | null
+  model: string | null
+  status: string
+  latencyMs: number | null
+  promptTokens: number | null
+  completionTokens: number | null
+  error: string | null
+  createdAt: string | null
+}
+
+export interface LlmLogPage {
+  records: LlmCallLog[]
+  total: number
+  page: number
+  size: number
+  successCount: number
+  failureCount: number
+  avgLatencyMs: number
+  promptTokens: number
+  completionTokens: number
+}
+
 
 
 export type TrendGranularity = 'MONTH' | 'QUARTER' | 'YEAR'

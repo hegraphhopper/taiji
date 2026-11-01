@@ -218,6 +218,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/backfill-trend.ps1 -
 - Docker：`Dockerfile` + `docker-compose.yml`（MySQL 8 + 应用）；本机无 Docker，未实际运行验证。
 - WeCode：入口/环境未提供，部署地址待补；本地地址 `http://127.0.0.1:5173`。
 - 大模型：设置 `LLM_ENABLED=true`、`LLM_BASE_URL`、`LLM_MODEL`、`LLM_API_KEY`；管理页“分析配置”可测试连接。解释层建议 `localWeight=100 / llmWeight=0`。
+- 模型调用日志：分析中心 → 模型调用日志（ADMIN/PMO），查看状态、耗时与 Token，不记录 Prompt/Key。
 
 ## 相关文档
 

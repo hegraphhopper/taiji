@@ -40,6 +40,7 @@
 | GET | `/analysis/pairs/{id}` | 登录 | 相似对明细 |
 | POST | `/analysis/precheck` | GROUP_USER/PMO/ADMIN | 预检（Top-1 可带模型解释） |
 | POST | `/system/llm/test` | ADMIN | 大模型连接自检 |
+| GET | `/analysis/llm-logs` | ADMIN/PMO | 模型调用日志分页、状态/模型/运行筛选与统计 |
 
 ## 趋势/投入/决策
 
