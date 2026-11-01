@@ -92,8 +92,15 @@ if (-not $SkipBackend) {
         if (-not (Test-Path $jar)) {
             throw "Jar not found: $jar. Run without -SkipBuild first."
         }
+        $javaArgs = @('-Djavax.net.ssl.trustStoreType=Windows-ROOT', '-jar', $jar,
+            '--spring.profiles.active=demo')
+        $localConfig = Join-Path $root 'application-local.yml'
+        if (Test-Path -LiteralPath $localConfig) {
+            $javaArgs += '--spring.config.additional-location=optional:file:./application-local.yml'
+            Write-Host '[backend] application-local.yml detected'
+        }
         $process = Start-Process -FilePath 'java' `
-            -ArgumentList '-Djavax.net.ssl.trustStoreType=Windows-ROOT', '-jar', $jar, '--spring.profiles.active=demo' `
+            -ArgumentList $javaArgs `
             -WorkingDirectory $root `
             -WindowStyle Hidden `
             -RedirectStandardOutput (Join-Path $targetDir 'app.out.log') `

@@ -1,5 +1,5 @@
 -- MySQL 8 schema for 自投研发项目重复投入治理平台
--- Generated from Flyway V1-V7; demo data is created by DemoDataInitializer.
+-- Generated from Flyway V1-V8; demo data is created by DemoDataInitializer.
 -- Usage: mysql -u root -p < db/mysql/schema.sql
 
 -- >>> V1__schema.sql
@@ -290,8 +290,8 @@ CREATE TABLE analysis_config (
     top_k INT NOT NULL DEFAULT 5,
     simultaneous_days INT NOT NULL DEFAULT 30,
     llm_enabled TINYINT NOT NULL DEFAULT 0,
-    local_weight INT NOT NULL DEFAULT 70,
-    llm_weight INT NOT NULL DEFAULT 30,
+    local_weight INT NOT NULL DEFAULT 100,
+    llm_weight INT NOT NULL DEFAULT 0,
     llm_top_n INT NOT NULL DEFAULT 5,
     llm_timeout_ms INT NOT NULL DEFAULT 8000,
     active TINYINT NOT NULL DEFAULT 1,
@@ -310,7 +310,7 @@ INSERT INTO analysis_config (
     1,
     '{"goal":15,"content":35,"tech":35,"milestone":5,"tag":10}',
     '{"high":80,"medium":60,"low":40}',
-    5, 30, 0, 70, 30, 5, 8000, 1, NULL, CURRENT_TIMESTAMP
+    5, 30, 0, 100, 0, 5, 8000, 1, NULL, CURRENT_TIMESTAMP
 );
 
 CREATE TABLE analysis_run (
@@ -472,5 +472,15 @@ CREATE INDEX idx_project_review_round ON project_review (project_id, round);
 
 ALTER TABLE analysis_pair ADD COLUMN llm_overlaps TEXT;
 ALTER TABLE analysis_pair ADD COLUMN llm_differences TEXT;
+
+
+-- >>> V8__llm_explanation_default.sql
+-- 大模型解释层默认口径：本地 100 / 大模型 0；仅迁移未启用大模型的旧默认配置。
+UPDATE analysis_config
+SET local_weight = 100,
+    llm_weight = 0
+WHERE local_weight = 70
+  AND llm_weight = 30
+  AND llm_enabled = 0;
 
 

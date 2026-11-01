@@ -30,8 +30,8 @@ public class AnalysisConfigService {
 
     private static final int DEFAULT_TOP_K = 5;
     private static final int DEFAULT_SIMULTANEOUS_DAYS = 30;
-    private static final int DEFAULT_LOCAL_WEIGHT = 70;
-    private static final int DEFAULT_LLM_WEIGHT = 30;
+    private static final int DEFAULT_LOCAL_WEIGHT = 100;
+    private static final int DEFAULT_LLM_WEIGHT = 0;
     private static final int DEFAULT_LLM_TOP_N = 5;
     private static final int DEFAULT_LLM_TIMEOUT_MS = 8000;
 

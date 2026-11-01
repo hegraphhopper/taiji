@@ -21,22 +21,25 @@
 - [x] `docs/demo-data.md`
 - [x] `docs/demo-script.md`
 - [x] `docs/A阶段产品设计书.md`
+- [x] `docs/review/需求分析.md` / `.docx`、`docs/review/系统设计.md` / `.docx`
+- [x] `docs/review/video/`：旁白、分镜、字幕与录制指南
 
 ## 3. 代码与验证
 
-- [x] `mvn -q test`：174/174
+- [x] `mvn -q test`：178/178
 - [x] `mvn -q -DskipTests package`
 - [x] `npm run typecheck` / `npm run build`
 - [x] 四角色权限与数据范围走查（16 张截图）
 - [x] 大模型解释层、连接自检、预检解释、报告复核段
-- [ ] 真实大模型联调：需注入 `LLM_BASE_URL/LLM_API_KEY/LLM_MODEL`
+- [x] 大模型收口：默认 100/0、有界重试、本地配置自动加载（2026-11-01）
+- [x] 真实大模型联调：DeepSeek `deepseek-flash`，自检/全量分析/预检/报告均通过（2026-11-01）
 - [ ] Docker Compose 实际运行：本机无 Docker，仅提供配置
 - [ ] WeCode 部署：环境/入口未提供
 
 ## 4. 数据库
 
 - [x] H2 备份与解压校验
-- [x] `db/mysql/schema.sql`（V1–V7）
+- [x] `db/mysql/schema.sql`（V1–V8，含大模型复核字段与解释层默认权重）
 - [ ] MySQL 8 实际导入验证（本机无实例）
 
 ## 5. 截图

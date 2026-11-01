@@ -2,7 +2,7 @@
 
 面向电科太极平台基金、创新基金等自投研发项目的项目管理与重复投入治理平台。A 阶段聚焦核心主线：**结构化申报书 → 多维重复度分析 → 重复度趋势与归因**。
 
-当前版本为 A4 趋势与归因版：在 A1 工程底座、A2 申报管理、A3 重复度分析之上，完成重复度趋势看板——按月/季/年聚合、四类归因构成、项目组归因矩阵、两种热力图、趋势点下钻与 CSV 导出。角色管理与 OA 审批流在 C 阶段收尾；投入态势与辅助决策在 B 阶段实现。
+当前版本为交付版：核心主线（结构化申报书、重复度分析、趋势归因）、增强功能（投入态势、辅助决策、报告导出）、治理收尾（四角色权限、审批流、审计）与交付物（演示数据、备份、文档、截图）均已完成；大模型为可选解释层，默认 100/0 不改变总分。
 
 ## 技术栈
 
@@ -214,10 +214,11 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/backfill-trend.ps1 -
 
 - 本地演示：`scripts/start-demo.ps1`。
 - H2 备份：`scripts/backup-db.ps1`；恢复：`scripts/restore-db.ps1 -Archive db/backup/<file>.zip -Force`。
-- MySQL：`db/mysql/schema.sql`（V1–V7）、`db/mysql/data.sql`，详见 `db/mysql/README.md`。
+- MySQL：`db/mysql/schema.sql`（V1–V8）、`db/mysql/data.sql`，详见 `db/mysql/README.md`。
 - Docker：`Dockerfile` + `docker-compose.yml`（MySQL 8 + 应用）；本机无 Docker，未实际运行验证。
 - WeCode：入口/环境未提供，部署地址待补；本地地址 `http://127.0.0.1:5173`。
-- 大模型：设置 `LLM_ENABLED=true`、`LLM_BASE_URL`、`LLM_MODEL`、`LLM_API_KEY`；管理页“分析配置”可测试连接。解释层建议 `localWeight=100 / llmWeight=0`。
+- 大模型：设置 `LLM_ENABLED=true`、`LLM_BASE_URL`、`LLM_MODEL`、`LLM_API_KEY`（可写入根目录 `application-local.yml`，启动脚本会自动加载）；管理页“分析配置”可测试连接。默认 `localWeight=100 / llmWeight=0`，模型分只作解释、不改变总分；超时/连接异常/5xx 最多重试 1 次，4xx 与非法 JSON 不重试，连续 3 次调用失败后熔断。
+- 大模型限制：候选对串行调用，无并发池；结果为进程内 24h 缓存，重启或多实例不共享；仅支持 OpenAI 兼容单一端点。
 - Windows + JDK 8 若出现 `PKIX path building failed`，启动脚本已加入 `-Djavax.net.ssl.trustStoreType=Windows-ROOT`；Linux 需将目标站点 CA 导入 JDK truststore。
 - 模型调用日志：分析中心 → 模型调用日志（ADMIN/PMO），查看状态、耗时与 Token，不记录 Prompt/Key。
 

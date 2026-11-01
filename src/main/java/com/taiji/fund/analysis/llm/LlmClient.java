@@ -22,6 +22,8 @@ public class LlmClient {
 
     private static final String SYSTEM_PROMPT = "你是科研项目查重专家，只输出 JSON。";
     private static final int MAX_ERROR_LENGTH = 500;
+    private static final int MAX_ATTEMPTS = 2;
+    private static final long RETRY_BACKOFF_MS = 150L;
 
     private final LlmHttpTransport transport;
     private final LlmResponseParser responseParser;
@@ -56,32 +58,46 @@ public class LlmClient {
             return LlmCallResult.failure(LlmStatus.INVALID, latency, "请求构造失败");
         }
 
-        LlmHttpResponse httpResponse;
-        try {
-            httpResponse = transport.post(options.endpoint(), requestBody,
-                    options.getApiKey(), Math.max(500, options.getTimeoutMs()));
-        } catch (Exception exception) {
-            long latency = System.currentTimeMillis() - start;
-            effectiveBreaker.recordFailure();
-            String error = "CONNECTION_ERROR";
-            record(request, options, LlmStatus.HTTP_ERROR, latency, null, null, error);
-            return LlmCallResult.failure(LlmStatus.HTTP_ERROR, latency, error);
+        LlmHttpResponse httpResponse = null;
+        LlmStatus lastStatus = LlmStatus.HTTP_ERROR;
+        String lastError = "CONNECTION_ERROR";
+        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            httpResponse = null;
+            try {
+                httpResponse = transport.post(options.endpoint(), requestBody,
+                        options.getApiKey(), Math.max(500, options.getTimeoutMs()));
+            } catch (Exception exception) {
+                lastStatus = LlmStatus.HTTP_ERROR;
+                lastError = "CONNECTION_ERROR";
+            }
+            if (httpResponse != null) {
+                int statusCode = httpResponse.getStatusCode();
+                if (statusCode >= 200 && statusCode < 300) {
+                    break;
+                }
+                if (statusCode == 0) {
+                    lastStatus = httpResponse.isTimeout() ? LlmStatus.TIMEOUT : LlmStatus.HTTP_ERROR;
+                    lastError = httpResponse.getError() == null ? "CONNECTION_ERROR" : httpResponse.getError();
+                } else if (statusCode >= 500) {
+                    lastStatus = LlmStatus.HTTP_ERROR;
+                    lastError = "HTTP " + statusCode;
+                } else {
+                    long latency = System.currentTimeMillis() - start;
+                    effectiveBreaker.recordFailure();
+                    String error = "HTTP " + statusCode;
+                    record(request, options, LlmStatus.HTTP_ERROR, latency, null, null, error);
+                    return LlmCallResult.failure(LlmStatus.HTTP_ERROR, latency, error);
+                }
+            }
+            if (attempt < MAX_ATTEMPTS && !sleepBeforeRetry()) {
+                break;
+            }
         }
         long latency = System.currentTimeMillis() - start;
-        if (httpResponse == null || httpResponse.getStatusCode() == 0) {
-            LlmStatus status = httpResponse != null && httpResponse.isTimeout()
-                    ? LlmStatus.TIMEOUT : LlmStatus.HTTP_ERROR;
-            String error = httpResponse == null ? "CONNECTION_ERROR"
-                    : (httpResponse.getError() == null ? "CONNECTION_ERROR" : httpResponse.getError());
+        if (httpResponse == null || httpResponse.getStatusCode() < 200 || httpResponse.getStatusCode() >= 300) {
             effectiveBreaker.recordFailure();
-            record(request, options, status, latency, null, null, error);
-            return LlmCallResult.failure(status, latency, error);
-        }
-        if (httpResponse.getStatusCode() < 200 || httpResponse.getStatusCode() >= 300) {
-            effectiveBreaker.recordFailure();
-            String error = "HTTP " + httpResponse.getStatusCode();
-            record(request, options, LlmStatus.HTTP_ERROR, latency, null, null, error);
-            return LlmCallResult.failure(LlmStatus.HTTP_ERROR, latency, error);
+            record(request, options, lastStatus, latency, null, null, lastError);
+            return LlmCallResult.failure(lastStatus, latency, lastError);
         }
 
         String content = extractContent(httpResponse.getBody());
@@ -98,6 +114,16 @@ public class LlmClient {
         effectiveBreaker.recordSuccess();
         record(request, options, LlmStatus.SUCCESS, latency, promptTokens, completionTokens, null);
         return LlmCallResult.success(parseResult.getResponse(), latency, promptTokens, completionTokens);
+    }
+
+    private boolean sleepBeforeRetry() {
+        try {
+            Thread.sleep(RETRY_BACKOFF_MS);
+            return true;
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            return false;
+        }
     }
 
     private String buildRequestBody(LlmOptions options, String userPrompt) throws Exception {

@@ -134,3 +134,23 @@ Invoke-RestMethod -Method Post -Uri http://localhost:8080/api/v1/analysis/runs -
 - 因本机无 Python，`task.py start/archive` 不可用；以 `task.json` 的 `status` 字段手工维护（planning → in_progress → completed），并在子任务 `prd.md` 记录实际完成时间。
 - 用户批准本计划后，将父任务与 `10-29-fund-foundation` 置为 `in_progress`，再进入实现。
 - A4 完成后做一次内部演示，确认核心叙事成立，再进入 B/C；如核心效果不达标，先修算法与数据，不急着补角色与审批流。
+
+## 8. 大模型收口执行清单（v1.2）
+
+- [x] 1. 调整默认解释层：`AnalysisConfigService` 默认 100/0；`V4` 种子 100/0；新增 `V8__llm_explanation_default.sql` 迁移旧库。
+- [x] 2. 前端默认值与提示：`AnalysisConfigView.vue` 默认 100/0，提示解释层口径。
+- [x] 3. `LlmClient` 有界重试：超时/连接异常/5xx 最多 2 次尝试，4xx/非法 JSON 不重试；熔断按调用计数。
+- [x] 4. 更新 `LlmFallbackTest`：新增 UT-32~UT-36，调整熔断用例的响应序列。
+- [x] 5. 配置可复现：`.env.example` 补 LLM 变量；`start-demo.ps1` 自动加载 `application-local.yml`。
+- [x] 6. 文档对齐：README（版本、解释层 100/0、重试、限制）、`docs/user-guide.md`、`docs/submission-checklist.md`、交付报告。
+- [x] 7. 验证：`mvn -q test`（重点 `LlmFallbackTest`、`AnalysisConfigServiceTest`、`ScoreFusionTest`）；`npm run typecheck`；`npm run build`。
+- [x] 8. 提交：`git add` 本次变更与 `docs/review/`，提交后推送 `origin`；推送失败需记录错误并告知用户。
+
+### 8.1 回滚点
+
+- 代码回滚：`git revert <llm-closure-commit>`；V8 仅影响默认权重，回滚后配置恢复 70/30。
+- 数据回滚：演示库删除 `data/` 由 Flyway 重建。
+
+### 8.2 手工维护说明
+
+本机 `python.exe` 返回 9009（不可用），`task.py` 无法执行；`test.jsonl`、`task.json` 状态与归档按仓库既有约定手工维护。

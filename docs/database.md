@@ -2,7 +2,7 @@
 
 ## 1. 迁移
 
-Flyway 位于 `src/main/resources/db/migration`，按 `V1`–`V7` 顺序执行；H2 与 MySQL 8 共用语法。
+Flyway 位于 `src/main/resources/db/migration`，按 `V1`–`V8` 顺序执行；H2 与 MySQL 8 共用语法。
 
 | 版本 | 内容 |
 |------|------|
@@ -13,6 +13,7 @@ Flyway 位于 `src/main/resources/db/migration`，按 `V1`–`V7` 顺序执行�
 | V5 | 决策：`decision_rule`、`decision_record` |
 | V6 | 系统参数 `system_config`、`project.review_round`、评审轮次索引 |
 | V7 | `analysis_pair.llm_overlaps`、`analysis_pair.llm_differences` |
+| V8 | 解释层默认权重迁移：旧默认 70/30（且未启用大模型）改为 100/0 |
 
 ## 2. 核心表
 

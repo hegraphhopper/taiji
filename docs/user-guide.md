@@ -46,7 +46,7 @@
 - 组织与字典：项目组、技术方向树形维护；被引用时不可删除。
 - 角色与权限：查看固定角色与权限点。
 - 系统参数：`review.requiredPassCount`（1–10，默认 2）。
-- 分析配置：字段权重、阈值、Top-K、大模型开关/权重/超时；“测试连接”验证模型。
+- 分析配置：字段权重、阈值、Top-K、大模型开关/权重/超时；“测试连接”验证模型。默认 100/0，模型分仅作解释、不改变总分；超时/连接异常/5xx 最多重试 1 次，4xx 与非法 JSON 不重试。
 - 模型调用日志：查看调用状态、耗时、Token 与错误，不包含 Prompt/Key。
 - 审计日志：条件查询、详情、CSV 导出；仅管理员可见。
 
@@ -54,6 +54,7 @@
 
 - **端口占用**：先执行 `scripts/stop-demo.ps1`。
 - **H2 锁**：不要同时启动两个后端指向同一 `data/`。
-- **大模型未生效**：检查 `LLM_ENABLED/LLM_BASE_URL/LLM_MODEL/LLM_API_KEY`，并在分析配置页开启；点击“测试连接”。
+- **大模型未生效**：检查 `LLM_ENABLED/LLM_BASE_URL/LLM_MODEL/LLM_API_KEY`（可写入 `application-local.yml`，启动脚本自动加载），并在分析配置页开启；点击“测试连接”。
+- **大模型开启后分数变化**：确认权重为 100/0；若大于 0，模型分会参与总分融合。
 - **大模型报 PKIX/证书错误**：Windows + JDK 8 使用 `-Djavax.net.ssl.trustStoreType=Windows-ROOT`（启动脚本已内置）；Linux 需导入 CA。
 - **趋势无数据**：执行分析运行或 `scripts/backfill-trend.ps1 -Months 14`。

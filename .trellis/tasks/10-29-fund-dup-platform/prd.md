@@ -6,10 +6,10 @@
 |----|------|
 | 赛题 | 电科太极自投研发项目重复投入治理 |
 | 任务 | `10-29-fund-dup-platform`（父任务，持有赛题原始需求与跨子任务验收） |
-| 版本 | v1.0 |
-| 状态 | 待评审（planning） |
-| 关联子任务 | foundation / declaration / dup-engine / trend-attribution / investment / decision / governance / delivery |
-| 版本说明 | v1.0 全量规划；v1.1 调整为首版核心先行，角色与 OA 收尾 |
+| 版本 | v1.2 |
+| 状态 | 已评审，可执行（in_progress） |
+| 关联子任务 | foundation / declaration / dup-engine / trend-attribution / investment / decision / governance / llm-expansion / delivery |
+| 版本说明 | v1.0 全量规划；v1.1 调整为首版核心先行，角色与 OA 收尾；v1.2 增补大模型收口范围与验收 |
 
 ## 1. 背景与问题
 
@@ -282,3 +282,35 @@
 - **角色体系与 OA 审批流最后**：完整角色管理、系统管理界面、形式审查、专家评审、审批流闭环放到 `fund-governance`。
 - **鉴权基础设施不后置**：登录、JWT、角色枚举、SecurityContext、数据范围钩子、审计写入在 foundation 中先实现，只是不展开管理界面与审批流程。这样后期补角色权限不需要重构接口层。
 - **首版验收口径**：AC-02、AC-04、AC-05、AC-06、AC-07 先达标；AC-01、AC-03 归入治理收尾阶段验收。
+
+## 12. 大模型收口（v1.2，2026-11-01 用户确认）
+
+### 12.1 背景
+
+`10-29-fund-llm-expansion` 已实现连接自检、解释层、预检复核、V7 落库与报告复核段，并用 DeepSeek 完成真实联调。但代码审查发现三处收口缺口：默认权重 70/30 与“解释层 100/0、总分不变”口径不一致；传输层 0 重试，与“重试有上限”要求不符；真实模型配置依赖本机 `application-local.yml`，交付环境不可复现。
+
+### 12.2 本期收口范围
+
+1. **解释层默认口径**：分析配置默认 `localWeight=100`、`llmWeight=0`；新库种子同步调整；旧库中仍为 70/30 且 `llm_enabled=0` 的配置一次性迁移为 100/0（V8）。
+2. **有界重试**：`LlmClient` 对超时、连接异常、HTTP 5xx 最多尝试 2 次（即重试 1 次）；HTTP 4xx、非法 JSON 不重试；熔断仍按“调用次数”计数，调用日志每次调用只记一条最终结果。
+3. **配置可复现**：`.env.example` 增加 `LLM_*` 占位；`scripts/start-demo.ps1` 检测到 `application-local.yml` 时自动注入 `spring.config.additional-location`；README 与用户手册写明解释层口径、重试边界与限制。
+4. **文档对齐**：更新 README 版本描述、提交清单中大模型联调状态、交付报告中的收口记录。
+
+### 12.3 本期不做
+
+- 大模型并发池、持久化缓存、多供应商适配、Prompt 编辑器、成本计费。
+- 修改既有本地算法、归因、趋势与报告口径。
+
+### 12.4 验收标准
+
+- [x] AC-13 解释层默认：未显式配置权重时保存出的配置为 100/0；开启大模型后总分与关闭时一致；旧库 70/30 且模型关闭的配置升级后为 100/0。
+- [x] AC-14 有界重试：超时/5xx 最多 2 次尝试；4xx 与非法 JSON 仅 1 次；第 3 次调用失败后熔断，第 4 次拒绝发起；每次调用只产生 1 条日志。
+- [x] AC-15 配置可复现：`.env.example` 含 `LLM_ENABLED/LLM_BASE_URL/LLM_MODEL/LLM_API_KEY`；`start-demo.ps1` 自动加载本地配置；文档明确 100/0、重试与“串行调用 / 进程内缓存”限制。
+- [x] AC-16 回归：`mvn test`、`npm run typecheck`、`npm run build` 全部通过，原有 174+ 用例无回归。
+
+### 12.5 决策记录
+
+- [x] 默认采用解释层 100/0，而非调整趋势口径：保持总分、快照与趋势稳定（依据：`fund-llm-expansion` PRD 与用户确认“收尾大模型功能”）。
+- [x] 重试上限 2 次尝试、只重试可恢复错误：限制延迟与成本，避免 4xx 无效重试（依据：FR-03“超时与重试有上限”）。
+- [x] 并发池与持久化缓存不纳入本期：当前串行调用耗时可控，缓存限制写入文档（依据：用户确认收尾范围）。
+- [x] 不新增依赖：重试用 `Thread.sleep` 退避，避免引入 Spring Retry（依据：现有依赖基线）。

@@ -62,36 +62,74 @@ class LlmFallbackTest {
     }
 
     @Test
-    @DisplayName("UT-19 HTTP 500 降级并记录 HTTP_ERROR")
-    void ut19_httpError() {
+    @DisplayName("UT-33 HTTP 500 重试耗尽后降级，只记一条 HTTP_ERROR")
+    void ut33_httpErrorRetryExhausted() {
         transport.responses.add(LlmHttpResponse.builder().statusCode(500).body("error").build());
-        LlmCallResult result = client.call(request("h3"), options(true), new LlmCircuitBreaker());
+        transport.responses.add(LlmHttpResponse.builder().statusCode(500).body("error").build());
+        LlmCircuitBreaker breaker = new LlmCircuitBreaker();
+        LlmCallResult result = client.call(request("h3"), options(true), breaker);
 
         assertThat(result.getStatus()).isEqualTo(LlmStatus.HTTP_ERROR);
+        assertThat(transport.calls).isEqualTo(2);
         assertThat(logs).hasSize(1);
         assertThat(logs.get(0).getStatus()).isEqualTo(LlmStatus.HTTP_ERROR);
         assertThat(logs.get(0).getError()).isEqualTo("HTTP 500");
+        assertThat(breaker.failures()).isEqualTo(1);
     }
 
     @Test
-    @DisplayName("UT-19 超时降级并记录 TIMEOUT")
+    @DisplayName("UT-32 超时后重试一次成功")
+    void ut32_timeoutThenSuccess() throws Exception {
+        transport.responses.add(LlmHttpResponse.builder().statusCode(0).timeout(true).error("TIMEOUT").build());
+        transport.responses.add(success(validContent(88D)));
+        LlmCircuitBreaker breaker = new LlmCircuitBreaker();
+        LlmCallResult result = client.call(request("h3-retry"), options(true), breaker);
+
+        assertThat(result.getStatus()).isEqualTo(LlmStatus.SUCCESS);
+        assertThat(result.getSemanticScore()).isEqualTo(88D);
+        assertThat(transport.calls).isEqualTo(2);
+        assertThat(logs).hasSize(1);
+        assertThat(logs.get(0).getStatus()).isEqualTo(LlmStatus.SUCCESS);
+        assertThat(breaker.failures()).isZero();
+    }
+
+    @Test
+    @DisplayName("UT-34 HTTP 400 不重试")
+    void ut34_clientErrorNoRetry() {
+        transport.responses.add(LlmHttpResponse.builder().statusCode(400).body("bad request").build());
+        LlmCallResult result = client.call(request("h3-400"), options(true), new LlmCircuitBreaker());
+
+        assertThat(result.getStatus()).isEqualTo(LlmStatus.HTTP_ERROR);
+        assertThat(transport.calls).isEqualTo(1);
+        assertThat(logs).hasSize(1);
+        assertThat(logs.get(0).getError()).isEqualTo("HTTP 400");
+    }
+
+    @Test
+    @DisplayName("UT-19 超时重试后仍失败，记一条 TIMEOUT")
     void ut19_timeout() {
+        transport.responses.add(LlmHttpResponse.builder().statusCode(0).timeout(true).error("TIMEOUT").build());
         transport.responses.add(LlmHttpResponse.builder().statusCode(0).timeout(true).error("TIMEOUT").build());
         LlmCallResult result = client.call(request("h4"), options(true), new LlmCircuitBreaker());
 
         assertThat(result.getStatus()).isEqualTo(LlmStatus.TIMEOUT);
+        assertThat(transport.calls).isEqualTo(2);
         assertThat(logs).hasSize(1);
         assertThat(logs.get(0).getStatus()).isEqualTo(LlmStatus.TIMEOUT);
     }
 
     @Test
-    @DisplayName("UT-19 连接失败归类为 HTTP_ERROR")
+    @DisplayName("UT-19 连接失败重试后归类为 HTTP_ERROR")
     void ut19_connectionError() {
+        transport.responses.add(LlmHttpResponse.builder().statusCode(0).timeout(false)
+                .error("CONNECTION_ERROR").build());
         transport.responses.add(LlmHttpResponse.builder().statusCode(0).timeout(false)
                 .error("CONNECTION_ERROR").build());
         LlmCallResult result = client.call(request("h5"), options(true), new LlmCircuitBreaker());
 
         assertThat(result.getStatus()).isEqualTo(LlmStatus.HTTP_ERROR);
+        assertThat(transport.calls).isEqualTo(2);
+        assertThat(logs).hasSize(1);
         assertThat(logs.get(0).getError()).isEqualTo("CONNECTION_ERROR");
     }
 
@@ -110,7 +148,7 @@ class LlmFallbackTest {
     @Test
     @DisplayName("UT-19 连续失败 3 次后熔断，第 4 次不再调用")
     void ut19_circuitBreaker() {
-        for (int index = 0; index < 4; index++) {
+        for (int index = 0; index < 6; index++) {
             transport.responses.add(LlmHttpResponse.builder().statusCode(0).timeout(true)
                     .error("TIMEOUT").build());
         }
@@ -124,7 +162,7 @@ class LlmFallbackTest {
         assertThat(second.getStatus()).isEqualTo(LlmStatus.TIMEOUT);
         assertThat(third.getStatus()).isEqualTo(LlmStatus.TIMEOUT);
         assertThat(fourth.getStatus()).isEqualTo(LlmStatus.DISABLED);
-        assertThat(transport.calls).isEqualTo(3);
+        assertThat(transport.calls).isEqualTo(6);
         assertThat(logs).hasSize(3);
         assertThat(breaker.isOpen()).isTrue();
         breaker.reset();

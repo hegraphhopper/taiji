@@ -43,8 +43,8 @@ class AnalysisConfigServiceTest extends AbstractApiTest {
         assertThat(version1.getTopK()).isEqualTo(5);
         assertThat(version1.getSimultaneousDays()).isEqualTo(30);
         assertThat(version1.getLlmEnabled()).isZero();
-        assertThat(version1.getLocalWeight()).isEqualTo(70);
-        assertThat(version1.getLlmWeight()).isEqualTo(30);
+        assertThat(version1.getLocalWeight()).isEqualTo(100);
+        assertThat(version1.getLlmWeight()).isZero();
         assertThat(version1.getActive()).isEqualTo(1);
 
         String token = loginToken("user01", "User@12345");
@@ -165,6 +165,41 @@ class AnalysisConfigServiceTest extends AbstractApiTest {
                 .andExpect(status().isForbidden());
 
         assertThat(maxVersion()).isEqualTo(versionBefore);
+    }
+
+    @Test
+    @Order(5)
+    @DisplayName("UT-30 未传权重时默认解释层 100/0")
+    void ut30_defaultWeights() throws Exception {
+        String token = loginToken("admin", "Admin@123");
+        Map<String, Object> body = new LinkedHashMap<>();
+        Map<String, Integer> weights = new LinkedHashMap<>();
+        weights.put("goal", 15);
+        weights.put("content", 35);
+        weights.put("tech", 35);
+        weights.put("milestone", 5);
+        weights.put("tag", 10);
+        Map<String, Integer> thresholds = new LinkedHashMap<>();
+        thresholds.put("high", 80);
+        thresholds.put("medium", 60);
+        thresholds.put("low", 40);
+        body.put("fieldWeights", weights);
+        body.put("thresholds", thresholds);
+        body.put("topK", 5);
+        body.put("simultaneousDays", 30);
+        body.put("llmEnabled", false);
+        body.put("llmTopN", 5);
+        body.put("llmTimeoutMs", 8000);
+
+        MvcResult result = mockMvc.perform(put("/api/v1/analysis/config")
+                        .header("Authorization", bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isOk())
+                .andReturn();
+        JsonNode data = readJson(result).path("data");
+        assertThat(data.path("localWeight").asInt()).isEqualTo(100);
+        assertThat(data.path("llmWeight").asInt()).isZero();
     }
 
     private int maxVersion() {

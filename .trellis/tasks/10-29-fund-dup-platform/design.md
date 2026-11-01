@@ -130,7 +130,7 @@ styles/        设计 token、全局样式
   "thresholds": {"high": 80, "medium": 60, "low": 40},
   "topK": 5,
   "simultaneousDays": 30,
-  "llm": {"enabled": false, "localWeight": 70, "llmWeight": 30, "topN": 5, "timeoutMs": 8000}
+  "llm": {"enabled": false, "localWeight": 100, "llmWeight": 0, "topN": 5, "timeoutMs": 8000}
 }
 ```
 
@@ -159,9 +159,11 @@ styles/        设计 token、全局样式
 ```text
 if (!llm.enabled || !configured) return local;
 candidates = topN by localScore (仅高/中等级候选)
-for pair in candidates (并发 ≤ 2):
+for pair in candidates (串行，单进程一次一调用):
     prompt = 结构化字段 + 双方项目摘要
-    resp = POST {baseUrl}/chat/completions   // temperature=0, JSON 输出
+    for attempt in 1..2:                     // 超时/连接异常/5xx 才重试
+        resp = POST {baseUrl}/chat/completions   // temperature=0, JSON 输出
+        if 2xx break
     validate JSON：{semanticScore:0-100, overlaps:[], differences:[], suggestion}
     on timeout/error/invalid → 记 llm_call_log，跳过该对
 final = weighted(localScore, llmScore)   // 仅成功对；失败对用 localScore
@@ -169,8 +171,9 @@ final = weighted(localScore, llmScore)   // 仅成功对；失败对用 localSco
 
 - Prompt 模板：`src/main/resources/prompts/duplicate-analysis.txt`，要求只输出 JSON、不得编造、不得返回 Markdown。
 - 安全：发送内容仅限结构化文本（截断），不发送附件二进制、用户手机号等；API Key 只从环境变量/加密配置读取，响应日志脱敏。
-- 熔断：单次运行连续 3 次失败即停止后续调用，本次运行标记 `llm_used=false`，不重试整轮。
-- 缓存：按 `sha256(projectId|peerId|字段文本|configVersion)` 缓存 24h（内存 Caffeine 或简单 ConcurrentHashMap + TTL），避免重复计费。
+- 重试：超时、连接异常、HTTP 5xx 最多尝试 2 次（重试 1 次，退避 150ms）；HTTP 4xx 与非法 JSON 不重试。重试在单次 `LlmClient.call` 内完成，熔断按调用计数，日志按调用记录最终结果。
+- 熔断：单次运行连续 3 次调用失败即停止后续调用，本次运行标记 `llm_used=false`。
+- 缓存：按 `sha256(projectId|peerId|字段文本|configVersion)` 在进程内缓存 24h，避免重复计费；重启失效，多实例不共享。
 - 成本可视化：`llm_call_log` 记录 token 与耗时，管理端可查。
 
 ### 5.4 归因与快照
@@ -305,3 +308,44 @@ java -jar target/fund-platform-1.0.0.jar --spring.profiles.active=demo
 - Flyway 版本只增不改；演示库升级自动执行。
 - 字段权重/阈值变更不重算历史快照，趋势保持稳定；需要重算时发起新 run。
 - 旧 run 结果保留，报告可复现当时口径（快照存 config 版本号）。
+
+## 11. 大模型收口设计（v1.2）
+
+### 11.1 默认解释层
+
+- `analysis_config` 默认 `local_weight=100 / llm_weight=0`，即模型分只作解释，不参与总分。
+- 新库由 `V4__analysis_schema.sql` 种子直接写入 100/0。
+- 旧库由 `V8__llm_explanation_default.sql` 迁移：仅当 `local_weight=70 AND llm_weight=30 AND llm_enabled=0` 时改为 100/0，避免覆盖用户显式配置。
+- `AnalysisConfigService` 的缺省值同步为 100/0；前端表单默认值同步，页面提示“解释层建议 100/0”。
+
+### 11.2 有界重试
+
+```text
+call():
+  cache hit -> return cached
+  for attempt = 1..2:
+      try transport.post(timeout)
+      catch -> lastError = CONNECTION_ERROR
+      if status 2xx -> parse & return
+      if status 0 or >= 500 -> lastError = TIMEOUT/HTTP_ERROR; sleep(150ms); continue
+      else -> return HTTP_ERROR (不重试)
+  breaker.recordFailure()
+  record one log with final status
+  return failure
+```
+
+- 重试不改变 `LlmCircuitBreaker` 语义：一次 `call` 只 `recordFailure()` 一次。
+- 重试不改变缓存：成功后才写入缓存。
+- 非法 JSON 不重试，避免把模型输出问题放大为多次计费。
+
+### 11.3 配置可复现
+
+- `.env.example` 增加 LLM 变量占位与说明。
+- `scripts/start-demo.ps1` 在 `application-local.yml` 存在时追加 `--spring.config.additional-location=optional:file:./application-local.yml`；不存在时保持原行为。
+- 真实联调步骤与 JDK 8 truststore 参数写入 README 与 `docs/user-guide.md`。
+
+### 11.4 已知限制（本期不处理）
+
+- LLM 调用串行，无并发池；真实模型下全量分析耗时随候选对数线性增长。
+- 缓存为进程内 24h，重启或多实例不共享。
+- 仅支持 OpenAI 兼容单一端点；Prompt 固定，不做在线编辑。

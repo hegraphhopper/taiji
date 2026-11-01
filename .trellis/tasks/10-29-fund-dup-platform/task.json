@@ -3,7 +3,7 @@
   "name": "fund-dup-platform",
   "title": "自投研发项目重复投入治理平台",
   "description": "面向电科太极平台基金/创新基金的项目管理与重复投入分析平台：申报书结构化、重复度分析、趋势归因、投入态势与辅助决策",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,
@@ -36,6 +36,6 @@
     "frontend/",
     "docs/A阶段产品设计书.md"
   ],
-  "notes": "总任务：持有赛题原始需求、跨子任务验收标准与最终集成评审；实现工作由子任务承担",
+  "notes": "总任务：持有赛题原始需求、跨子任务验收标准与最终集成评审；实现工作由子任务承担。2026-11-01 起承担大模型收口（v1.2）直接工作。",
   "meta": {}
 }

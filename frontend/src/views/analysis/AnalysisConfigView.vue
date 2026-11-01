@@ -97,7 +97,7 @@
               <el-input-number v-model="form.llmTimeoutMs" :min="500" :max="60000" :step="500" controls-position="right" />
             </el-form-item>
           </div>
-          <p class="form-hint">本地与大模型权重之和需大于 0；当前合计 {{ form.localWeight + form.llmWeight }}。</p>
+          <p class="form-hint">本地与大模型权重之和需大于 0；当前合计 {{ form.localWeight + form.llmWeight }}。解释层建议 100/0，模型分只作说明、不改变总分。</p>
         </div>
 
         <div class="form-actions">
@@ -177,8 +177,8 @@ const form = reactive<AnalysisConfigPayload>({
   topK: 5,
   simultaneousDays: 30,
   llmEnabled: false,
-  localWeight: 70,
-  llmWeight: 30,
+  localWeight: 100,
+  llmWeight: 0,
   llmTopN: 5,
   llmTimeoutMs: 8000
 })
