@@ -2,7 +2,11 @@
 
 面向电科太极平台基金、创新基金等自投研发项目的项目管理与重复投入治理平台。A 阶段聚焦核心主线：**结构化申报书 → 多维重复度分析 → 重复度趋势与归因**。
 
-当前版本为交付版：核心主线（结构化申报书、重复度分析、趋势归因）、增强功能（投入态势、辅助决策、报告导出）、治理收尾（四角色权限、审批流、审计）与交付物（演示数据、备份、文档、截图）均已完成；大模型为可选解释层，默认 100/0 不改变总分。
+当前版本为交付版：核心主线（结构化申报书、重复度分析、趋势归因）、增强功能（投入态势、辅助决策、报告导出）、治理收尾（四角色权限、审批流、审计）与交付物（演示数据、备份、文档、截图、演示视频）均已完成；大模型为可选解释层，默认 100/0 不改变总分。
+
+- 代码仓库：`https://github.com/hegraphhopper/taiji`
+- 交付分支：`wecode/member-shangcirenwuzhix-779d`
+- 本地演示地址：`http://127.0.0.1:5173`（WeCode 地址待环境提供后补）
 
 ## 技术栈
 
@@ -13,12 +17,39 @@
 | 前端 | Vue 3 + TypeScript + Vite 5、Element Plus、Pinia、Vue Router、Axios |
 | 构建 | JDK 8、Maven 3.5+、Node 18+ |
 
-## 环境要求
+## 环境依赖
 
-- JDK 1.8
-- Maven 3.5 及以上
-- Node.js 18 及以上（当前开发环境为 Node 24）
-- 可选：MySQL 8（生产部署）；本地演示无需安装数据库
+| 依赖 | 版本要求 | 用途 | 是否必需 |
+|------|----------|------|----------|
+| JDK | 1.8（已适配 1.8.0_65） | 后端编译与运行 | 必需 |
+| Maven | 3.5 及以上 | 后端构建 | 必需 |
+| Node.js / npm | Node 18 及以上（开发环境 Node 24） | 前端构建与开发服务 | 必需 |
+| H2 | 随依赖内置 2.1.214 | 本地演示数据库（文件模式） | 自动 |
+| MySQL | 8.0 | 生产数据库 | 可选 |
+| Docker / Docker Compose | 20.10+ / v2 | 容器化部署 | 可选 |
+
+- 默认端口：后端 `8080`，前端 `5173`；被占用时先停止旧进程或修改 `SERVER_PORT`。
+- 本地演示不需要安装 MySQL 或 Docker；首次启动会自动建表并写入演示数据。
+- Windows PowerShell 执行脚本需带 `-ExecutionPolicy Bypass`；手动命令在 Linux/macOS 下等效。
+
+### 首次启动步骤
+
+```powershell
+# 1. 克隆代码
+git clone https://github.com/hegraphhopper/taiji.git
+cd taiji
+git checkout wecode/member-shangcirenwuzhix-779d
+
+# 2. 确认依赖版本
+java -version          # 1.8.x
+mvn -version           # 3.5+
+node -v && npm -v      # Node 18+
+
+# 3. 一键启动（首次会构建后端并安装前端依赖）
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-demo.ps1
+```
+
+启动完成后访问 `http://127.0.0.1:5173`，使用下方演示账号登录。
 
 ## 快速启动（推荐）
 
@@ -97,6 +128,23 @@ cd frontend
 npm run build
 ```
 
+## 构建与测试
+
+```powershell
+# 后端全量测试与打包
+mvn -q test
+mvn -q -DskipTests package
+
+# 前端类型检查与生产构建
+cd frontend
+npm.cmd run typecheck
+npm.cmd run build
+```
+
+- 测试使用 H2 内存库，不依赖本机 MySQL。
+- 性能用例默认排除；需要时执行 `mvn test "-Dtest=AnalysisPerformanceTest" "-Dtest.excludedGroups=none"`。
+- 构建产物：`target/fund-platform-1.0.0.jar`、`frontend/dist/`（均不入库）。
+
 ## 配置说明
 
 公共配置见 `src/main/resources/application.yml`，演示配置见 `application-demo.yml`，生产配置见 `application-prod.yml`。
@@ -112,6 +160,9 @@ npm run build
 | `ADMIN_INIT_PASSWORD` | prod 首次启动管理员密码 | 无 |
 | `LLM_ENABLED` | 是否启用大模型语义复核 | `false` |
 | `LLM_BASE_URL` / `LLM_MODEL` / `LLM_API_KEY` | OpenAI 兼容接口地址、模型、密钥（仅环境变量，不落库不写日志） | 无 |
+| `DB_SEED_ENABLED` | 首次启动用内置 H2 快照初始化数据文件（部署用） | `false` |
+| `DB_SEED_TARGET` / `DB_SEED_MARKER` | 快照目标数据文件与初始化标记文件 | 无 |
+| `DB_SEED_RESOURCE` | 内置快照 classpath 路径 | `classpath:db/seed/funddb.mv.db` |
 
 演示数据落在 `./data/funddb.*`（H2 文件库），首次启动由 Flyway 自动建表并写入种子。删除 `data/` 可重建演示库。
 
@@ -122,22 +173,32 @@ npm run build
 ├─ src/main/java/com/taiji/fund/     后端源码
 │  ├─ common/                        统一响应、异常、枚举、审计注解
 │  ├─ config/                        Security、MyBatis-Plus、Jackson、OpenAPI、CORS
-│  ├─ security/                      JWT、过滤器、登录服务、数据范围钩子
+│  ├─ security/                      JWT、过滤器、登录服务、数据范围
 │  ├─ system/                        用户/角色/项目组/技术方向/字典/审计
 │  ├─ project/                       项目主数据、结构化内容、状态机、查询
 │  ├─ document/                      附件上传、文本提取、章节解析
-│  ├─ analysis/                      分析配置、分词/向量/打分/归因、运行与查询
-│  ├─ insight/trend/                 趋势聚合、归因矩阵、热力图、摘要与 CSV
+│  ├─ analysis/                      分析配置、分词/向量/打分、LLM、运行与项目对
+│  ├─ insight/trend/                 趋势聚合、归因矩阵、热力图、下钻与 CSV
+│  ├─ insight/investment/            投入态势、风险敞口、多维分布与导出
+│  ├─ decision/                      预检、建议规则、决策记录、Word/Excel 报告
+│  ├─ dashboard/                     工作台汇总指标
 │  ├─ health/                        健康检查
-│  └─ bootstrap/                     演示账号初始化
+│  └─ bootstrap/                     演示账号与演示数据初始化
 ├─ src/main/resources/
-│  ├─ application*.yml               配置（含 app.llm.*，默认关闭）
+│  ├─ application*.yml               公共/演示/生产配置（含 app.llm.*，默认关闭）
 │  ├─ terms/tech-terms.txt           内置技术术语词典（310 条）
 │  ├─ prompts/duplicate-analysis.txt LLM 查重提示词
-│  └─ db/migration/                  Flyway V1 系统表、V2 种子、V3 项目、V4 分析
+│  ├─ db/migration/                  Flyway V1–V8（系统、项目、分析、决策、大模型）
+│  └─ db/seed/funddb.mv.db           可选：部署用 H2 演示数据快照
 ├─ frontend/                         Vue 3 + TypeScript 前端
-├─ scripts/                          start/stop/status 与趋势历史回填脚本
-├─ docs/                             产品设计与交付文档
+│  ├─ src/api/                       按模块封装的接口
+│  ├─ src/views/                     工作台、项目、分析、趋势、投入、决策、系统
+│  ├─ src/components/                图表、报告弹窗与通用组件
+│  └─ src/stores/                    登录态、字典、应用状态
+├─ scripts/                          启动/停止/状态、趋势回填、备份/恢复脚本
+├─ db/                               H2 备份、MySQL schema/data、部署说明
+├─ docs/                             需求、设计、接口、用户手册、指标、演示与截图
+├─ docs/review/                      需求分析/系统设计 DOCX 与演示视频材料
 ├─ data/                             本地 H2 数据（git 忽略）
 ├─ storage/                          附件存储（git 忽略）
 └─ target/                           构建产物与运行日志（git 忽略）
@@ -150,7 +211,7 @@ npm run build
 - 登录失败 5 次锁定 10 分钟；禁用用户 token 立即失效
 - 组织、技术方向种子与只读接口；字典聚合接口
 - 审计写入（登录、登出、改密），密码字段脱敏
-- 前端登录页、主布局、路由守卫、工作台占位、403/404
+- 前端登录页、主布局、路由守卫、工作台真实指标（项目总数/平均最高重复度/高风险项目）、403/404
 - 演示账号初始化、健康检查、Swagger
 - 启动 / 停止 / 状态脚本
 
@@ -174,7 +235,8 @@ npm run build
 - 可选大模型：OpenAI 兼容接口，仅复核 Top-N，超时/500/非法 JSON 自动降级，单次运行连续 3 次失败熔断，24h 缓存、调用日志脱敏
 - 运行：全量 / 单项目 / 预检，并发保护（重复触发 409），失败清理，`analysisDate` 历史回填
 - 快照与报告：项目级最高分、Top-K 平均、高风险对数、四类归因计数、风险敞口；项目详情「重复度」Tab 展示
-- 前端：分析运行页、分析配置页（ADMIN）、菜单按角色显隐
+- 运行报告：分析运行历史「查看报告」直接展示该次运行的项目对、总分/等级/中性归因、五维分与重复/差异点；支持只看高风险与分页
+- 前端：分析运行页、分析运行报告、分析配置页（ADMIN）、菜单按角色显隐
 - 性能：300 项目全量分析约 1.5s（门禁 5s）；性能用例默认排除，手动执行 `mvn test "-Dtest=AnalysisPerformanceTest" "-Dtest.excludedGroups=none"`
 
 ## A4 已实现能力
@@ -202,6 +264,26 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/backfill-trend.ps1 -
 
 演示数据规模：60 个项目、8 个项目组、4 类技术方向分布、7 种状态；同组重复 2 对、跨组在先 6 对、同期并行 2 对，其余为低重复/无关主题；每项目含目标、研制内容、关键技术、节点与成员。
 
+## B 阶段已实现能力
+
+- 投入态势：投入总额、项目数、在研/结项、平均预算、平均重复度、高风险项目数、重复投入风险敞口。
+- 多维分析：按年度、基金类型、项目组、技术方向；同比/环比、Top 风险、组间对比、散点与下钻。
+- 辅助决策：新项目预检输出风险分、等级、Top-5 相似项目、重复/差异点、建议动作、预计重复投入金额与建议专家。
+- 决策记录：保存预检快照与操作人，可追溯；支持 Word 决策报告与 Excel 明细导出。
+
+## C 阶段已实现能力
+
+- 四类角色（ADMIN/PMO/GROUP_USER/EXPERT）菜单与接口权限；服务层强制数据范围。
+- 用户、角色、项目组、技术方向、系统参数与审计日志管理。
+- 形式审查、专家评审（评分/意见/结论）、立项/驳回、在研/结项完整状态机与审批轨迹。
+- 待办中心与评审任务；关键写操作全部留痕。
+
+## D 阶段交付物
+
+- 60 个项目、8 个项目组、2024–2026 三个年度、7 种状态的演示数据；14 个月趋势快照。
+- H2 文件库备份/恢复脚本，MySQL 8 schema 与部署说明，Docker 配置，演示视频与截图。
+- 需求分析、系统设计、数据库、接口、用户手册、指标口径、演示脚本与提交清单。
+
 ## 已包含
 
 - A 阶段：登录/JWT/角色、项目与申报书、附件解析、重复度分析、运行报告、趋势归因。
@@ -214,6 +296,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/backfill-trend.ps1 -
 
 - 本地演示：`scripts/start-demo.ps1`。
 - H2 备份：`scripts/backup-db.ps1`；恢复：`scripts/restore-db.ps1 -Archive db/backup/<file>.zip -Force`。
+- 部署内置数据：设置 `DB_SEED_ENABLED=true`、`DB_SEED_TARGET=/data/funddb.mv.db`、`DB_SEED_MARKER=/data/.db-seeded`，首次启动会把 `db/seed/funddb.mv.db` 复制到目标位置；标记文件存在后不会覆盖运行期数据。
 - MySQL：`db/mysql/schema.sql`（V1–V8）、`db/mysql/data.sql`，详见 `db/mysql/README.md`。
 - Docker：`Dockerfile` + `docker-compose.yml`（MySQL 8 + 应用）；本机无 Docker，未实际运行验证。
 - WeCode：入口/环境未提供，部署地址待补；本地地址 `http://127.0.0.1:5173`。
@@ -234,6 +317,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/backfill-trend.ps1 -
 - `docs/demo-script.md`：5 分钟演示脚本
 - `docs/submission-checklist.md`：四项交付物清单
 - `docs/A阶段产品设计书.md`：A 阶段产品与交互基线
+- `docs/review/需求分析.docx`、`docs/review/系统设计.docx`：评审版文档
+- `docs/review/video/`：演示视频、字幕、分镜与录制指南
 - `.trellis/spec/backend/analysis-guidelines.md`：分析口径、接口、归因与降级契约
 - `.trellis/spec/backend/insight-guidelines.md`：趋势去重、项目视角口径、下钻与 CSV 契约
 - `.trellis/tasks/10-29-fund-dup-platform/`：整体规划、设计、子任务拆分

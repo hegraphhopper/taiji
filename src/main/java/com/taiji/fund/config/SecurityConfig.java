@@ -45,7 +45,9 @@ public class SecurityConfig {
                 .accessDeniedHandler(accessDeniedHandler).and()
                 .authorizeRequests()
                 .antMatchers(PUBLIC_PATHS).permitAll()
-                .anyRequest().authenticated().and()
+                // 前端静态资源与 SPA 路由由 Web 容器直接返回，接口仍统一鉴权
+                .antMatchers("/api/**").authenticated()
+                .anyRequest().permitAll().and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
