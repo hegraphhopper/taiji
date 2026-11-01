@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "后端质量门禁"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "前端质量与构建检查"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "复用快照查询与数据范围逻辑"}
+{"file": ".trellis/tasks/11-01-fund-dashboard-summary/test/用例设计.md", "reason": "验收用例"}

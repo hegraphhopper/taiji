@@ -1,0 +1,29 @@
+{
+  "id": "fund-dashboard-summary",
+  "name": "fund-dashboard-summary",
+  "title": "工作台真实指标",
+  "description": "工作台三个 KPI（项目总数、平均最高重复度、高风险项目）改为按当前角色数据范围聚合的真实数据",
+  "status": "completed",
+  "dev_type": "fullstack",
+  "scope": "backend+frontend",
+  "package": null,
+  "priority": "P1",
+  "creator": "wangkuo@core.ez",
+  "assignee": "wangkuo@core.ez",
+  "createdAt": "2026-11-01",
+  "completedAt": "2026-11-01",
+  "branch": null,
+  "base_branch": "wecode/member-shangcirenwuzhix-779d",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "10-29-fund-dup-platform",
+  "relatedFiles": [
+    "frontend/src/views/dashboard/DashboardView.vue",
+    "src/main/java/com/taiji/fund/dashboard"
+  ],
+  "notes": "方案 B：新增 /api/v1/dashboard/summary，按 canView 数据范围统计全部可见项目；平均分与高风险基于最新快照。",
+  "meta": {}
+}

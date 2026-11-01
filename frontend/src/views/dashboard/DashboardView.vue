@@ -11,7 +11,16 @@
       </div>
     </div>
 
-    <section class="kpi-grid">
+    <el-alert
+      v-if="summaryError"
+      :title="summaryError"
+      type="warning"
+      :closable="false"
+      show-icon
+      class="kpi-error"
+    />
+
+    <section v-loading="summaryLoading" class="kpi-grid">
       <article v-for="item in kpis" :key="item.label" class="card kpi-card">
         <div class="kpi-top">
           <span class="kpi-label">{{ item.label }}</span>
@@ -117,43 +126,70 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import dayjs from 'dayjs'
 import { Folder, Refresh } from '@element-plus/icons-vue'
+import { getDashboardSummary } from '@/api/dashboard'
 import { useAuthStore } from '@/stores/auth'
 import { useDictStore } from '@/stores/dict'
+import type { DashboardSummary } from '@/types'
 
 const auth = useAuthStore()
 const dict = useDictStore()
 
 const today = dayjs().format('YYYY 年 MM 月 DD 日')
 
-const kpis = computed(() => [
-  {
-    label: '项目总数',
-    value: '—',
-    phase: 'A2',
-    hint: '项目管理接入后展示'
-  },
-  {
-    label: '平均最高重复度',
-    value: '—',
-    phase: 'A3',
-    hint: '分析引擎运行后计算'
-  },
-  {
-    label: '高风险项目',
-    value: '—',
-    phase: 'A3',
-    hint: '重复度达到高阈值'
-  },
-  {
-    label: '技术方向',
-    value: String(dict.techDirections.length),
-    phase: '就绪',
-    hint: '用于项目打标与相似度'
+const summary = ref<DashboardSummary | null>(null)
+const summaryLoading = ref(false)
+const summaryError = ref('')
+
+const kpis = computed(() => {
+  const data = summary.value
+  const loading = summaryLoading.value
+  return [
+    {
+      label: '项目总数',
+      value: loading ? '…' : data ? String(data.projectCount) : '—',
+      phase: '实时',
+      hint: '当前角色可见项目'
+    },
+    {
+      label: '平均最高重复度',
+      value: loading ? '…' : data?.avgMaxScore != null ? data.avgMaxScore.toFixed(2) : '—',
+      phase: '实时',
+      hint: data ? `已分析 ${data.analyzedCount} / ${data.projectCount}` : '分析引擎运行后计算'
+    },
+    {
+      label: '高风险项目',
+      value: loading ? '…' : data ? String(data.highRiskCount) : '—',
+      phase: '实时',
+      hint: `最高分 ≥ ${data?.thresholds?.high ?? 80}`
+    },
+    {
+      label: '技术方向',
+      value: String(dict.techDirections.length),
+      phase: '就绪',
+      hint: '用于项目打标与相似度'
+    }
+  ]
+})
+
+onMounted(() => {
+  loadSummary()
+})
+
+async function loadSummary(): Promise<void> {
+  summaryLoading.value = true
+  summaryError.value = ''
+  try {
+    summary.value = await getDashboardSummary()
+  } catch (exception) {
+    summary.value = null
+    summaryError.value = exception instanceof Error ? exception.message : '工作台指标加载失败'
+  } finally {
+    summaryLoading.value = false
   }
-])
+}
 
 const baseItems = computed(() => [
   { label: '项目组', value: dict.dicts ? '8' : '—' },
@@ -221,6 +257,10 @@ function reloadDict(): void {
 .env-tag {
   border-color: var(--border-strong);
   color: var(--ink-muted);
+}
+
+.kpi-error {
+  margin-bottom: 16px;
 }
 
 .kpi-grid {

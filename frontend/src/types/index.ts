@@ -848,3 +848,12 @@ export interface TechDirectionSavePayload {
   sort?: number
   enabled?: number
 }
+
+export interface DashboardSummary {
+  projectCount: number
+  analyzedCount: number
+  avgMaxScore: number | null
+  highRiskCount: number
+  thresholds: Record<string, number>
+}
+
