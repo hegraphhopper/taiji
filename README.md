@@ -202,21 +202,37 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/backfill-trend.ps1 -
 
 演示数据规模：60 个项目、8 个项目组、4 类技术方向分布、7 种状态；同组重复 2 对、跨组在先 6 对、同期并行 2 对，其余为低重复/无关主题；每项目含目标、研制内容、关键技术、节点与成员。
 
-## 尚未包含
+## 已包含
 
-- 用户/角色/项目组/技术方向管理界面（C）
-- 形式审查、专家评审、完整审批流（C）
-- 投入态势、辅助决策与报告导出（B）
+- A 阶段：登录/JWT/角色、项目与申报书、附件解析、重复度分析、趋势归因。
+- B 阶段：投入态势、辅助决策、决策记录、Word/Excel 报告。
+- C 阶段：四角色权限、用户/组/字典/参数/审计、专家评审、审批流、待办。
+- D 阶段：60 项目演示数据、14 个月趋势回填、H2 备份脚本、MySQL schema、文档与截图。
+- 大模型：连接自检、解释层（不改变总分）、预检 Top-1 复核、报告模型复核段。
+
+## 部署与数据
+
+- 本地演示：`scripts/start-demo.ps1`。
+- H2 备份：`scripts/backup-db.ps1`；恢复：`scripts/restore-db.ps1 -Archive db/backup/<file>.zip -Force`。
+- MySQL：`db/mysql/schema.sql`（V1–V7）、`db/mysql/data.sql`，详见 `db/mysql/README.md`。
+- Docker：`Dockerfile` + `docker-compose.yml`（MySQL 8 + 应用）；本机无 Docker，未实际运行验证。
+- WeCode：入口/环境未提供，部署地址待补；本地地址 `http://127.0.0.1:5173`。
+- 大模型：设置 `LLM_ENABLED=true`、`LLM_BASE_URL`、`LLM_MODEL`、`LLM_API_KEY`；管理页“分析配置”可测试连接。解释层建议 `localWeight=100 / llmWeight=0`。
 
 ## 相关文档
 
-- `docs/A阶段产品设计书.md`：A 阶段产品、交互、数据、接口、算法与验收基线
-- `.trellis/tasks/archive/2026-10/10-29-fund-foundation/prd.md`：A1 需求与验收标准
-- `.trellis/tasks/archive/2026-10/10-29-fund-declaration/`：A2 需求、设计、执行计划与验收报告
-- `.trellis/tasks/archive/2026-10/10-29-fund-dup-engine/`：A3 需求、设计、执行计划与测试用例
+- `docs/requirements-analysis.md`：需求、角色、流程、验收
+- `docs/design.md`：架构、模块、算法、部署
+- `docs/database.md`：表、索引、口径
+- `docs/api.md`：接口、权限、错误码、示例
+- `docs/user-guide.md`：四角色操作手册
+- `docs/metrics.md`：重复度、归因、风险敞口、PASS 门禁
+- `docs/demo-data.md`：演示数据规模与账号
+- `docs/demo-script.md`：5 分钟演示脚本
+- `docs/submission-checklist.md`：四项交付物清单
+- `docs/A阶段产品设计书.md`：A 阶段产品与交互基线
 - `.trellis/spec/backend/analysis-guidelines.md`：分析口径、接口、归因与降级契约
 - `.trellis/spec/backend/insight-guidelines.md`：趋势去重、项目视角口径、下钻与 CSV 契约
-- `.trellis/tasks/archive/2026-10/10-29-fund-trend-attribution/`：A4 需求、设计、用例与验收报告
 - `.trellis/tasks/10-29-fund-dup-platform/`：整体规划、设计、子任务拆分
 
 ## 常见问题
