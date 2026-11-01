@@ -1,0 +1,5 @@
+{"file": ".trellis/spec/backend/index.md", "reason": "后端规范索引"}
+{"file": ".trellis/spec/backend/security-guidelines.md", "reason": "模型密钥与权限"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "V7 迁移"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "配置页与详情展示"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "LLM 字段后端到前端贯通"}

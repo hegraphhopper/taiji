@@ -59,6 +59,10 @@ public class AnalysisPair {
 
     private String llmReason;
 
+    private String llmOverlaps;
+
+    private String llmDifferences;
+
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
 }

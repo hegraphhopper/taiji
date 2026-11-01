@@ -41,6 +41,7 @@ public class DecisionWordReportBuilder {
             pointsTable(document, "三、重复点", record.getSimilarProjects(), true);
             pointsTable(document, "四、差异点", record.getSimilarProjects(), false);
             note(document);
+            llmSection(document, record.getSimilarProjects());
             document.write(output);
             return output.toByteArray();
         } catch (IOException exception) {
@@ -126,6 +127,32 @@ public class DecisionWordReportBuilder {
         PeerMatchVO top = peers.get(0);
         List<MatchPoint> points = matched ? top.getMatchedPoints() : top.getDiffPoints();
         return points == null ? Collections.emptyList() : points;
+    }
+
+    private void llmSection(XWPFDocument document, List<PeerMatchVO> peers) {
+        heading(document, "六、大模型复核");
+        List<PeerMatchVO> rows = peers == null ? Collections.emptyList() : peers;
+        boolean has = false;
+        for (PeerMatchVO peer : rows) {
+            boolean hasReason = peer.getLlmReason() != null && !peer.getLlmReason().trim().isEmpty();
+            boolean hasOverlaps = peer.getLlmOverlaps() != null && !peer.getLlmOverlaps().isEmpty();
+            boolean hasDifferences = peer.getLlmDifferences() != null && !peer.getLlmDifferences().isEmpty();
+            if (!hasReason && !hasOverlaps && !hasDifferences) {
+                continue;
+            }
+            has = true;
+            String name = peer.getPeer() == null ? "相似项目" : value(peer.getPeer().getName(), "相似项目");
+            paragraph(document, name + "：" + value(peer.getLlmReason(), "无结论"));
+            if (hasOverlaps) {
+                paragraph(document, "模型重复点：" + String.join("；", peer.getLlmOverlaps()));
+            }
+            if (hasDifferences) {
+                paragraph(document, "模型差异点：" + String.join("；", peer.getLlmDifferences()));
+            }
+        }
+        if (!has) {
+            paragraph(document, "本次决策为本地算法结果，大模型未启用或调用失败。");
+        }
     }
 
     private void note(XWPFDocument document) {

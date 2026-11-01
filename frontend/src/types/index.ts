@@ -336,6 +336,8 @@ export interface PeerMatch {
   matchedPoints: MatchPoint[]
   diffPoints: MatchPoint[]
   llmReason: string | null
+  llmOverlaps?: string[] | null
+  llmDifferences?: string[] | null
   suggestion: string | null
 }
 
@@ -383,6 +385,8 @@ export interface PairDetail {
   matchedPoints: MatchPoint[]
   diffPoints: MatchPoint[]
   llmReason: string | null
+  llmOverlaps?: string[] | null
+  llmDifferences?: string[] | null
   createdAt: string | null
 }
 
@@ -400,7 +404,16 @@ export interface AnalysisPrecheckResult {
   projectId: number | null
   peerCount: number
   configVersion: number
+  llmUsed?: boolean
   topPeers: PeerMatch[]
+}
+
+export interface LlmTestResult {
+  success: boolean
+  status: string
+  latencyMs: number
+  model: string
+  message: string
 }
 
 

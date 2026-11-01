@@ -10,7 +10,8 @@ import type {
   ApiResult,
   PageResult,
   PairDetail,
-  ProjectAnalysisReport
+  ProjectAnalysisReport,
+  LlmTestResult
 } from '@/types'
 
 export function getAnalysisConfig(): Promise<AnalysisConfig> {
@@ -75,5 +76,11 @@ export function getAnalysisPair(pairId: number): Promise<PairDetail> {
 export function precheckAnalysis(payload: AnalysisPrecheckPayload): Promise<AnalysisPrecheckResult> {
   return http
     .post<ApiResult<AnalysisPrecheckResult>>('/analysis/precheck', payload)
+    .then((response) => response.data.data)
+}
+
+export function testLlmConnection(): Promise<LlmTestResult> {
+  return http
+    .post<ApiResult<LlmTestResult>>('/system/llm/test')
     .then((response) => response.data.data)
 }

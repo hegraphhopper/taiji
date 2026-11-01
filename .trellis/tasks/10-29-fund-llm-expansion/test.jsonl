@@ -1,0 +1,5 @@
+{"file": ".trellis/tasks/10-29-fund-llm-expansion/test/用例设计.md", "reason": "LLM 扩展单元测试输入"}
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "测试与构建命令"}
+{"file": ".trellis/spec/backend/security-guidelines.md", "reason": "密钥不入日志、权限与审计"}
+{"file": ".trellis/spec/backend/database-guidelines.md", "reason": "V7 H2/MySQL 兼容"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "前端构建与展示验收"}

@@ -91,6 +91,8 @@ class DecisionRecordReportTest extends AbstractDecisionTest {
         assertThat(wordText).contains("三、重复点");
         assertThat(wordText).contains("四、差异点");
         assertThat(wordText).contains("五、口径与免责说明");
+        assertThat(wordText).contains("六、大模型复核");
+        assertThat(wordText).contains("本地算法结果");
         assertThat(wordText).contains(project.getCode());
 
         MvcResult excel = download(token, recordId, "xlsx");
@@ -98,7 +100,7 @@ class DecisionRecordReportTest extends AbstractDecisionTest {
                 .contains(".xlsx").contains(project.getCode());
         try (XSSFWorkbook workbook = new XSSFWorkbook(
                 new ByteArrayInputStream(excel.getResponse().getContentAsByteArray()))) {
-            assertThat(sheetNames(workbook)).contains("相似项目", "重复点", "差异点", "口径");
+            assertThat(sheetNames(workbook)).contains("相似项目", "重复点", "差异点", "口径", "模型复核");
             assertThat(workbook.getSheet("相似项目").getRow(0).getCell(2).getStringCellValue())
                     .isEqualTo("项目名称");
         }

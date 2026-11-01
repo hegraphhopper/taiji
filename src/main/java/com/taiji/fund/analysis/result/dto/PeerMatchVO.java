@@ -44,6 +44,10 @@ public class PeerMatchVO {
 
     private String llmReason;
 
+    private List<String> llmOverlaps;
+
+    private List<String> llmDifferences;
+
     /**
      * 建议动作，仅预检返回：HIGH→MERGE、MEDIUM/LOW→EXPLAIN、NONE→APPROVE。
      */

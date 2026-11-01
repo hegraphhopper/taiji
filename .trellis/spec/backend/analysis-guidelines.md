@@ -76,6 +76,11 @@ LlmClient.call(...) / LlmCache.key(...) / LlmCallLogService
 - 融合 `(localW×local + llmW×llm)/(localW+llmW)`；失败对保留本地分；单次运行连续失败 3 次熔断。
 - `llm_call_log` 只写状态/耗时/token/错误；禁止写 prompt 正文、API Key、项目正文。
 
+- 解释层模式：`localWeight=100 / llmWeight=0` 时总分与趋势不变，只写 `llm_score/llm_reason/llm_overlaps/llm_differences`。
+- 连接自检：`POST /api/v1/system/llm/test`（ADMIN），返回状态/耗时/模型，不返回 Key；未配置返回 DISABLED。
+- 预检：仅对 Top-1 相似对调用，超时/失败不阻断；`llmUsed=false` 时风险分与规则建议保持本地口径。
+- 报告：Word“六、大模型复核”、Excel“模型复核”Sheet；无数据输出“本地算法结果”。
+
 ### 查询与权限
 
 - 复用 `ProjectAccessService`：GROUP_USER 本组、EXPERT 已提交（含本组约束）、PMO/ADMIN 全量；项目对明细要求双方至少一方可见。

@@ -1,0 +1,32 @@
+{
+  "id": "fund-llm-expansion",
+  "name": "fund-llm-expansion",
+  "title": "大模型能力扩展（解释、预检与报告）",
+  "description": "启用大模型解释层，新增连接自检、决策预检模型复核、重复/差异点落库与报告模型复核段",
+  "status": "in_progress",
+  "dev_type": "fullstack",
+  "scope": "backend+frontend",
+  "package": null,
+  "priority": "P0",
+  "creator": "wangkuo@core.ez",
+  "assignee": "wangkuo@core.ez",
+  "createdAt": "2026-11-01",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "wecode/member-shangcirenwuzhix-779d",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "10-29-fund-dup-platform",
+  "relatedFiles": [
+    "src/main/java/com/taiji/fund/analysis/llm",
+    "src/main/java/com/taiji/fund/analysis/run/AnalysisExecutor.java",
+    "src/main/java/com/taiji/fund/decision",
+    "frontend/src/views/project/ProjectDetailView.vue",
+    "frontend/src/views/analysis/AnalysisConfigView.vue"
+  ],
+  "notes": "单任务执行，不拆子任务；LLM 仅作解释层，不改变总分与趋势",
+  "meta": {}
+}

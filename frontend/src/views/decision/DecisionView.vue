@@ -87,6 +87,7 @@
               <span v-else class="llm-tag">本地算法</span>
             </div>
             <p class="reason">{{ result.reason }}</p>
+        <p v-if="topLlmReason" class="llm-reason">模型复核：{{ topLlmReason }}</p>
             <dl class="metrics">
               <div>
                 <dt>预计重复投入</dt>
@@ -184,7 +185,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getProjects } from '@/api/project'
@@ -217,6 +218,7 @@ const textForm = reactive({
   budget: null as number | null
 })
 const result = ref<DecisionPrecheckResult | null>(null)
+const topLlmReason = computed(() => result.value?.topPeers?.[0]?.llmReason || '')
 const loading = ref(false)
 const saving = ref(false)
 
@@ -465,6 +467,12 @@ onMounted(async () => {
 .llm-tag {
   font-size: 12px;
   color: var(--ink-faint);
+}
+
+.llm-reason {
+  margin: 6px 0 0;
+  color: var(--ink-muted);
+  font-size: 13px;
 }
 
 .reason {

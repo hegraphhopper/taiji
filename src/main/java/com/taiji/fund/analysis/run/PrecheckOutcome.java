@@ -18,6 +18,8 @@ public class PrecheckOutcome {
 
     private final int projectCount;
 
+    private final boolean llmUsed;
+
     public List<AnalysisPair> getPairs() {
         return pairs == null ? Collections.emptyList() : pairs;
     }

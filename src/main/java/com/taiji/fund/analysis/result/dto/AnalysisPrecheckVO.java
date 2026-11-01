@@ -20,5 +20,7 @@ public class AnalysisPrecheckVO {
 
     private Integer configVersion;
 
+    private Boolean llmUsed;
+
     private List<PeerMatchVO> topPeers;
 }

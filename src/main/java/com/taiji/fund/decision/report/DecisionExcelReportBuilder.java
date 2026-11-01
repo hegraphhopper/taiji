@@ -32,6 +32,7 @@ public class DecisionExcelReportBuilder {
             peerSheet(workbook, peers);
             pointSheet(workbook, "重复点", peers, true);
             pointSheet(workbook, "差异点", peers, false);
+            llmSheet(workbook, peers);
             noteSheet(workbook, record);
             workbook.write(output);
             return output.toByteArray();
@@ -104,6 +105,41 @@ public class DecisionExcelReportBuilder {
             }
         }
         width(sheet, headers.length);
+    }
+
+    private void llmSheet(SXSSFWorkbook workbook, List<PeerMatchVO> peers) {
+        Sheet sheet = workbook.createSheet("模型复核");
+        String[] headers = {"序号", "项目名称", "模型结论", "模型重复点", "模型差异点"};
+        header(sheet, headers);
+        int rowIndex = 1;
+        int sequence = 1;
+        boolean has = false;
+        for (PeerMatchVO peer : peers) {
+            boolean hasReason = peer.getLlmReason() != null && !peer.getLlmReason().trim().isEmpty();
+            boolean hasOverlaps = peer.getLlmOverlaps() != null && !peer.getLlmOverlaps().isEmpty();
+            boolean hasDifferences = peer.getLlmDifferences() != null && !peer.getLlmDifferences().isEmpty();
+            if (!hasReason && !hasOverlaps && !hasDifferences) {
+                continue;
+            }
+            has = true;
+            Row row = sheet.createRow(rowIndex++);
+            row.createCell(0).setCellValue(sequence++);
+            row.createCell(1).setCellValue(peer.getPeer() == null
+                    ? "" : nullSafe(peer.getPeer().getName()));
+            row.createCell(2).setCellValue(nullSafe(peer.getLlmReason()));
+            row.createCell(3).setCellValue(join(peer.getLlmOverlaps()));
+            row.createCell(4).setCellValue(join(peer.getLlmDifferences()));
+        }
+        if (!has) {
+            Row row = sheet.createRow(rowIndex);
+            row.createCell(1).setCellValue("本地算法结果");
+            row.createCell(2).setCellValue("大模型未启用或调用失败");
+        }
+        width(sheet, headers.length);
+    }
+
+    private String join(List<String> values) {
+        return values == null ? "" : String.join("；", values);
     }
 
     private void noteSheet(SXSSFWorkbook workbook, DecisionRecordVO record) {

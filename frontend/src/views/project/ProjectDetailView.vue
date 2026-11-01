@@ -309,6 +309,20 @@
                         </div>
                       </div>
                     </div>
+                    <div v-if="peer.llmOverlaps?.length || peer.llmDifferences?.length" class="llm-points">
+                      <div v-if="peer.llmOverlaps?.length" class="point-block">
+                        <h4>模型重复点</h4>
+                        <ul>
+                          <li v-for="(item, index) in peer.llmOverlaps" :key="`lo-${index}`">{{ item }}</li>
+                        </ul>
+                      </div>
+                      <div v-if="peer.llmDifferences?.length" class="point-block">
+                        <h4>模型差异点</h4>
+                        <ul>
+                          <li v-for="(item, index) in peer.llmDifferences" :key="`ld-${index}`">{{ item }}</li>
+                        </ul>
+                      </div>
+                    </div>
                     <el-alert
                       v-if="peer.llmReason"
                       :title="`大模型补充理由：${peer.llmReason}`"
@@ -1064,6 +1078,18 @@ function formatSize(size: number): string {
   align-items: center;
   gap: 8px;
   font-size: 13px;
+}
+
+.llm-points {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+}
+
+.llm-points ul {
+  margin: 6px 0 0 18px;
+  padding: 0;
 }
 
 .point-grid {

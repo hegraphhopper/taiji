@@ -1,6 +1,7 @@
 package com.taiji.fund.analysis.run;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.taiji.fund.analysis.config.AnalysisConfigVO;
 import com.taiji.fund.analysis.config.FieldWeights;
 import com.taiji.fund.analysis.config.Thresholds;
@@ -82,6 +83,7 @@ public class AnalysisExecutor {
     private final LlmClient llmClient;
     private final LlmPromptBuilder promptBuilder;
     private final LlmProperties llmProperties;
+    private final ObjectMapper objectMapper;
 
     private final TfIdfVectorizer vectorizer = new TfIdfVectorizer();
     private final DimensionScorer dimensionScorer = new DimensionScorer();
@@ -212,29 +214,36 @@ public class AnalysisExecutor {
         int targetIndex = inputs.size();
         inputs.add(target);
         if (inputs.size() < 2) {
-            return new PrecheckOutcome(Collections.emptyList(), inputs.size());
+            return new PrecheckOutcome(Collections.emptyList(), inputs.size(), false);
         }
 
         CorpusVectors vectors = vectorize(inputs);
         Thresholds thresholds = resolveThresholds(config);
         FieldWeights weights = FieldWeights.of(config.getFieldWeights());
 
-        List<AnalysisPair> results = new ArrayList<>(peers.size());
+        List<PairDraft> drafts = new ArrayList<>(peers.size());
         for (int index = 0; index < peers.size(); index++) {
             PairDraft draft = scorePair(inputs, vectors, weights, thresholds, targetIndex, index, config);
             draft.llmScore = null;
             draft.totalScore = draft.localScore;
             draft.level = DuplicateLevel.of(draft.totalScore, thresholds);
-            results.add(toEntity(draft, inputs, vectors, runId));
+            drafts.add(draft);
         }
-        results.sort(Comparator.comparingDouble(
-                        (AnalysisPair pair) -> pair.getTotalScore().doubleValue()).reversed()
-                .thenComparing(AnalysisPair::getPeerProjectId,
-                        Comparator.nullsLast(Comparator.naturalOrder())));
+        drafts.sort(Comparator.comparingDouble((PairDraft draft) -> draft.localScore).reversed()
+                .thenComparingInt(draft -> draft.left)
+                .thenComparingInt(draft -> draft.right));
         int topK = positive(config.getTopK(), DEFAULT_TOP_K);
-        List<AnalysisPair> topPeers = results.size() <= topK
-                ? results : new ArrayList<>(results.subList(0, topK));
-        return new PrecheckOutcome(topPeers, inputs.size());
+        List<PairDraft> topDrafts = drafts.size() <= topK
+                ? drafts : new ArrayList<>(drafts.subList(0, topK));
+        boolean llmUsed = false;
+        if (!topDrafts.isEmpty()) {
+            llmUsed = applyLlm(Collections.singletonList(topDrafts.get(0)), inputs, config, runId);
+        }
+        List<AnalysisPair> topPeers = new ArrayList<>(topDrafts.size());
+        for (PairDraft draft : topDrafts) {
+            topPeers.add(toEntity(draft, inputs, vectors, runId));
+        }
+        return new PrecheckOutcome(topPeers, inputs.size(), llmUsed);
     }
 
     private PairDraft scorePair(List<ProjectAnalysisInput> inputs, CorpusVectors vectors,
@@ -333,6 +342,8 @@ public class AnalysisExecutor {
             if (result.isSuccess() && result.getResponse() != null) {
                 draft.llmScore = result.getResponse().getSemanticScore();
                 draft.llmReason = result.getResponse().getReason();
+                draft.llmOverlaps = result.getResponse().getOverlaps();
+                draft.llmDifferences = result.getResponse().getDifferences();
                 llmUsed = true;
             }
             if (breaker.isOpen()) {
@@ -372,7 +383,21 @@ public class AnalysisExecutor {
                 vectors.content.get(draft.left), vectors.content.get(draft.right),
                 vectors.tech.get(draft.left), vectors.tech.get(draft.right), false)));
         pair.setLlmReason(draft.llmReason);
+        pair.setLlmOverlaps(toJson(draft.llmOverlaps));
+        pair.setLlmDifferences(toJson(draft.llmDifferences));
         return pair;
+    }
+
+    private String toJson(List<String> values) {
+        if (values == null || values.isEmpty()) {
+            return null;
+        }
+        try {
+            return objectMapper.writeValueAsString(values);
+        } catch (Exception exception) {
+            log.warn("LLM 复核点序列化失败: {}", exception.getClass().getSimpleName());
+            return null;
+        }
     }
 
     /**
@@ -597,6 +622,8 @@ public class AnalysisExecutor {
         private DuplicateLevel level;
         private Attribution attribution;
         private String llmReason;
+        private List<String> llmOverlaps;
+        private List<String> llmDifferences;
 
         private String key() {
             return left + ":" + right;

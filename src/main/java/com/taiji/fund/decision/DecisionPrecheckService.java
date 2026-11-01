@@ -110,7 +110,7 @@ public class DecisionPrecheckService {
                 .reason(reason(riskScore, level, top, rule))
                 .savingsEstimate(savings)
                 .suggestedExperts(expertService.suggest(directionId))
-                .llmUsed(false)
+                .llmUsed(Boolean.TRUE.equals(outcome.getLlmUsed()))
                 .inputHash(project == null ? hash(request) : null)
                 .build();
     }

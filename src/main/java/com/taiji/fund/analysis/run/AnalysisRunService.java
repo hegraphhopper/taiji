@@ -131,7 +131,7 @@ public class AnalysisRunService {
                 run.setStatus(RunStatus.SUCCESS.name());
                 run.setProjectCount(outcome.getProjectCount());
                 run.setPairCount(outcome.getPairs().size());
-                run.setLlmUsed(0);
+                run.setLlmUsed(outcome.isLlmUsed() ? 1 : 0);
                 run.setDurationMs(Math.max(1L, System.currentTimeMillis() - start));
                 runMapper.updateById(run);
                 return AnalysisPrecheckVO.builder()
@@ -139,6 +139,7 @@ public class AnalysisRunService {
                         .projectId(input.getProjectId())
                         .peerCount(outcome.getPairs().size())
                         .configVersion(config.getVersion())
+                        .llmUsed(outcome.isLlmUsed())
                         .topPeers(peerMatchAssembler.assemble(
                                 outcome.getPairs(), input.getProjectId(), true))
                         .build();

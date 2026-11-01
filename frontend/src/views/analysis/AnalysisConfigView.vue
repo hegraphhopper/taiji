@@ -79,6 +79,10 @@
           <el-form-item label="启用大模型">
             <el-switch v-model="form.llmEnabled" active-text="开启" inactive-text="关闭" />
           </el-form-item>
+          <div class="llm-test">
+            <el-button size="small" :loading="testingLlm" @click="runLlmTest">测试连接</el-button>
+            <span v-if="llmTestMessage" class="llm-test-message">{{ llmTestMessage }}</span>
+          </div>
           <div class="param-grid">
             <el-form-item label="本地权重" prop="localWeight">
               <el-input-number v-model="form.localWeight" :min="0" :max="100" controls-position="right" />
@@ -146,7 +150,8 @@ import { Refresh } from '@element-plus/icons-vue'
 import {
   getAnalysisConfig,
   getAnalysisConfigHistory,
-  saveAnalysisConfig
+  saveAnalysisConfig,
+  testLlmConnection
 } from '@/api/analysis'
 import type { AnalysisConfig, AnalysisConfigPayload } from '@/types'
 
@@ -161,6 +166,8 @@ const weightFields = [
 const formRef = ref<FormInstance>()
 const loading = ref(false)
 const saving = ref(false)
+const testingLlm = ref(false)
+const llmTestMessage = ref('')
 const history = ref<AnalysisConfig[]>([])
 const currentVersion = ref<number | null>(null)
 
@@ -283,6 +290,27 @@ async function submit(): Promise<void> {
     ElMessage.error(exception instanceof Error ? exception.message : '保存失败')
   } finally {
     saving.value = false
+  }
+}
+
+async function runLlmTest(): Promise<void> {
+  testingLlm.value = true
+  llmTestMessage.value = ''
+  try {
+    const result = await testLlmConnection()
+    llmTestMessage.value = result.success
+      ? `连接成功（${result.model}，${result.latencyMs}ms）`
+      : `连接失败：${result.message}`
+    if (result.success) {
+      ElMessage.success(llmTestMessage.value)
+    } else {
+      ElMessage.error(llmTestMessage.value)
+    }
+  } catch (exception) {
+    llmTestMessage.value = exception instanceof Error ? exception.message : '连接测试失败'
+    ElMessage.error(llmTestMessage.value)
+  } finally {
+    testingLlm.value = false
   }
 }
 

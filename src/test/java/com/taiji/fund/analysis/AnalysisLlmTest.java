@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.taiji.fund.analysis.llm.LlmCallResult;
 import com.taiji.fund.analysis.llm.LlmClient;
 import com.taiji.fund.analysis.llm.LlmResponse;
+import com.taiji.fund.analysis.llm.LlmStatus;
 import com.taiji.fund.analysis.result.AnalysisPair;
 import com.taiji.fund.common.enums.ProjectStatus;
 import org.junit.jupiter.api.DisplayName;
@@ -21,6 +22,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -75,13 +77,66 @@ class AnalysisLlmTest extends AbstractAnalysisTest {
                 .isEqualByComparingTo("100.00");
     }
 
+    @Test
+    @DisplayName("UT-L04 预检 Top-1 使用大模型解释且总分不变")
+    void ut21PrecheckUsesLlm() throws Exception {
+        Long group = groupId("GRP-INTELLIGENCE");
+        LocalDateTime submitTime = LocalDateTime.of(2026, 8, 1, 9, 0);
+        buildProject(group, "预检对照项目", submitTime);
+        long target = buildProject(group, "预检目标项目", submitTime);
+        String admin = adminToken();
+        saveConfig(admin, 70, 30);
+        doReturn(LlmCallResult.success(new LlmResponse(88D, Arrays.asList("模型重叠点"),
+                        Arrays.asList("模型差异点"), "EXPLAIN", "模型复核结论"), 10L, 8, 4))
+                .when(llmClient).call(any(), any(), any());
+
+        MvcResult result = mockMvc.perform(post("/api/v1/analysis/precheck")
+                        .header("Authorization", bearer(admin))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"projectId\":" + target + "}"))
+                .andExpect(status().isOk()).andReturn();
+        JsonNode data = readJson(result).path("data");
+        assertThat(data.path("llmUsed").asBoolean()).isTrue();
+        JsonNode top = data.path("topPeers").get(0);
+        assertThat(top.path("llmReason").asText()).isEqualTo("模型复核结论");
+        assertThat(top.path("totalScore").decimalValue())
+                .isEqualByComparingTo(top.path("localScore").decimalValue());
+        assertThat(top.path("llmOverlaps").get(0).asText()).isEqualTo("模型重叠点");
+    }
+
+    @Test
+    @DisplayName("UT-L01/L02 连接自检成功、失败与权限")
+    void ut22ConnectionTest() throws Exception {
+        doReturn(LlmCallResult.success(new LlmResponse(50D, Arrays.asList(), Arrays.asList(),
+                        "EXPLAIN", "连接测试"), 12L, 3, 2))
+                .when(llmClient).call(any(), any(), any());
+        JsonNode ok = readJson(mockMvc.perform(post("/api/v1/system/llm/test")
+                        .header("Authorization", bearer(adminToken())))
+                .andExpect(status().isOk()).andReturn()).path("data");
+        assertThat(ok.path("success").asBoolean()).isTrue();
+        assertThat(ok.path("model").asText()).isEqualTo("test-model");
+        assertThat(ok.toString()).doesNotContain("apiKey");
+
+        doReturn(LlmCallResult.failure(LlmStatus.TIMEOUT, 15L, "TIMEOUT"))
+                .when(llmClient).call(any(), any(), any());
+        JsonNode failed = readJson(mockMvc.perform(post("/api/v1/system/llm/test")
+                        .header("Authorization", bearer(adminToken())))
+                .andExpect(status().isOk()).andReturn()).path("data");
+        assertThat(failed.path("success").asBoolean()).isFalse();
+        assertThat(failed.path("status").asText()).isEqualTo("TIMEOUT");
+
+        mockMvc.perform(post("/api/v1/system/llm/test")
+                        .header("Authorization", bearer(pmoToken())))
+                .andExpect(status().isForbidden());
+    }
+
     private void saveConfig(String token, int localWeight, int llmWeight) throws Exception {
         String body = "{"
                 + "\"fieldWeights\":{\"goal\":15,\"content\":35,\"tech\":35,\"milestone\":5,\"tag\":10},"
                 + "\"thresholds\":{\"high\":80,\"medium\":60,\"low\":40},"
                 + "\"topK\":5,\"simultaneousDays\":30,\"llmEnabled\":true,"
                 + "\"localWeight\":" + localWeight + ",\"llmWeight\":" + llmWeight + ","
-                + "\"llmTopN\":5,\"llmTimeoutMs\":8000}";
+                + "\"llmTopN\":10,\"llmTimeoutMs\":8000}";
         MvcResult result = mockMvc.perform(put("/api/v1/analysis/config")
                         .header("Authorization", bearer(token))
                         .contentType(MediaType.APPLICATION_JSON)

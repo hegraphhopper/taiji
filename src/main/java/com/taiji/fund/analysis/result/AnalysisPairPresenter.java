@@ -33,6 +33,10 @@ public class AnalysisPairPresenter {
             new TypeReference<List<MatchPoint>>() {
             };
 
+    private static final TypeReference<List<String>> STRING_LIST_TYPE =
+            new TypeReference<List<String>>() {
+            };
+
     private final ObjectMapper objectMapper;
 
     /**
@@ -91,6 +95,8 @@ public class AnalysisPairPresenter {
                 .matchedPoints(parsePoints(pair.getMatchedPoints()))
                 .diffPoints(parsePoints(pair.getDiffPoints()))
                 .llmReason(pair.getLlmReason())
+                .llmOverlaps(parseStrings(pair.getLlmOverlaps()))
+                .llmDifferences(parseStrings(pair.getLlmDifferences()))
                 .suggestion(suggestion)
                 .build();
     }
@@ -114,6 +120,8 @@ public class AnalysisPairPresenter {
                 .matchedPoints(parsePoints(pair.getMatchedPoints()))
                 .diffPoints(parsePoints(pair.getDiffPoints()))
                 .llmReason(pair.getLlmReason())
+                .llmOverlaps(parseStrings(pair.getLlmOverlaps()))
+                .llmDifferences(parseStrings(pair.getLlmDifferences()))
                 .createdAt(pair.getCreatedAt())
                 .build();
     }
@@ -140,6 +148,19 @@ public class AnalysisPairPresenter {
             return points == null ? new ArrayList<>() : points;
         } catch (JsonProcessingException exception) {
             log.warn("分析片段解析失败，按空列表处理: {}", exception.getClass().getSimpleName());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<String> parseStrings(String json) {
+        if (json == null || json.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+        try {
+            List<String> values = objectMapper.readValue(json, STRING_LIST_TYPE);
+            return values == null ? new ArrayList<>() : values;
+        } catch (JsonProcessingException exception) {
+            log.warn("LLM point parse failed: {}", exception.getClass().getSimpleName());
             return new ArrayList<>();
         }
     }

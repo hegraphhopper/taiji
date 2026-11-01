@@ -48,5 +48,9 @@ public class PairDetailVO {
 
     private String llmReason;
 
+    private List<String> llmOverlaps;
+
+    private List<String> llmDifferences;
+
     private LocalDateTime createdAt;
 }

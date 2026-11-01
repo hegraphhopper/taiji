@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/backend/quality-guidelines.md", "reason": "全量测试与构建门禁"}
+{"file": ".trellis/spec/backend/security-guidelines.md", "reason": "密钥不泄露与 ADMIN 权限"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "前端构建验收"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "LLM 字段贯通检查"}
