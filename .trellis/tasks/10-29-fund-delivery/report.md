@@ -44,7 +44,7 @@
 - MySQL 8 导入：本机无实例，未实测。
 - 真实大模型联调：未注入 LLM_BASE_URL/LLM_API_KEY/LLM_MODEL。
 - 附件样例与 20+ 附件元数据：未生成。
-- 远程推送：GitHub 仓库 hegraphhopper/taiji 对 keywsky 无写权限；本地提交完成，push 403。
+- 远程推送：SSH key（keywsky）无写权限；改用已登录的 `gh` HTTPS 凭据推送成功，分支 `wecode/member-shangcirenwuzhix-779d`，提交 `f91ff22`。
 
 ### 验证
 - mvn -q test：174/174。
