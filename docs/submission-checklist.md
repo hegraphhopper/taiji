@@ -5,7 +5,7 @@
 | 交付物 | 状态 | 位置/说明 |
 |--------|------|-----------|
 | 应用访问地址 | 待部署 | 本地 `http://127.0.0.1:5173`；WeCode 地址未获取，D5 阻塞 |
-| 代码仓库 | 已提交并推送 | `https://github.com/hegraphopper/taiji`，分支 `wecode/member-shangcirenwuzhix-779d`（截至 `f91ff22`） |
+| 代码仓库 | 已提交并推送 | `https://github.com/hegraphhopper/taiji`，分支 `wecode/member-shangcirenwuzhix-779d`（截至 `37ba93c`） |
 | 数据库备份 | 已完成 | `db/backup/fund-platform-20261101-100939.zip` |
 | 需求分析与设计文档 | 已完成 | `docs/requirements-analysis.md`、`docs/design.md`、`docs/database.md`、`docs/api.md` 等 |
 
